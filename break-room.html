@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IceyDomain • Break Room</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="ice-icon">☕</span>
+        <span class="brand-name">Break Room</span>
+      </div>
+
+      <p class="sidebar-label">SECRET ZONE</p>
+      <ul class="nav-menu">
+        <li><a href="break-room.html" class="nav-item active">🎮 Lounge & Games</a></li>
+      </ul>
+
+      <p class="sidebar-label">NAVIGATION</p>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-item">📊 Dashboard</a></li>
+        <li><a href="notes.html" class="nav-item">📝 Notes</a></li>
+      </ul>
+    </aside>
+
+    <div class="main-content">
+      
+      <header class="top-header">
+        <div class="header-title">
+          <h1>The Chill Lounge 🧊</h1>
+          <p>Take a quick breather, start a study timer, or play embedded games.</p>
+        </div>
+        <div class="user-badge">
+          <span class="user-avatar">🕶️</span>
+          <span class="user-name">Hidden Access</span>
+        </div>
+      </header>
+
+      <main class="dashboard-grid">
+        
+        <div class="card card-large align-center">
+          <div class="card-header w-100">
+            <div>
+              <h3>🎮 Arcade & External Games</h3>
+              <p class="text-muted">Play embedded web games or link your other sites.</p>
+            </div>
+            <span class="badge cyan-badge">Embedded</span>
+          </div>
+
+          <div class="game-frame-wrapper">
+           <iframe 
+  id="gameFrame" 
+  src="game-2048.html" 
+  title="2048 Local" 
+  allowfullscreen>
+</iframe>
+          </div>
+        </div>
+
+        <div class="stat-stack">
+          
+          <div class="card align-center">
+            <div class="card-header w-100">
+              <h3>⏱️ Rest Timer</h3>
+            </div>
+
+            <div class="timer-display">
+              <span id="timerText">05:00</span>
+            </div>
+
+            <div class="timer-controls">
+              <button id="startTimerBtn" class="btn-primary-sm">Start Break</button>
+              <button id="resetTimerBtn" class="btn-secondary-sm">Reset</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>🌐 External Games & Sites</h3>
+            </div>
+            <p class="text-muted mb-16">Connect your other websites:</p>
+            
+            <div class="input-group-vertical">
+              <a href="https://your-other-site.com" target="_blank" class="card-link-btn">Launch External Site 1 ↗</a>
+              <a href="https://your-second-site.com" target="_blank" class="card-link-btn">Launch External Site 2 ↗</a>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+
+      <footer class="dashboard-footer">
+        <p>IceyDomain Secret Lounge • Unlisted Page</p>
+        <a href="index.html" class="secret-trigger" title="Back to Dashboard">🏠</a>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

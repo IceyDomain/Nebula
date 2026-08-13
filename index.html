@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IceyDomain • School Hub</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div id="loginOverlay" class="login-container">
+    <div class="login-card">
+      <span class="lock-icon">🔒</span>
+      <h2>IceyDomain Hub</h2>
+      <p>Enter your password to unlock your workspace.</p>
+      
+      <form id="loginForm">
+        <div class="password-wrapper">
+          <input type="password" id="passwordInput" placeholder="Password..." required />
+          <button type="button" id="togglePasswordBtn" class="eye-btn" aria-label="Toggle password visibility">
+            👁️
+          </button>
+        </div>
+        <button type="submit" class="btn-primary">Unlock Dashboard →</button>
+      </form>
+      <p id="errorMessage" class="error-text"></p>
+    </div>
+  </div>
+
+  <div id="protectedContent" class="dashboard-wrapper hidden">
+    
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="ice-icon">❄️</span>
+        <span class="brand-name">IceyDomain</span>
+      </div>
+
+      <p class="sidebar-label">NAVIGATE</p>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-item active">📊 Dashboard</a></li>
+        <li><a href="notes.html" class="nav-item">📝 Notes & Homework</a></li>
+        <li><a href="https://classroom.google.com" target="_blank" class="nav-item">🏫 Google Classroom ↗</a></li>
+      </ul>
+
+      <p class="sidebar-label">SETTINGS</p>
+      <ul class="nav-menu">
+        <li><button id="logoutBtn" class="nav-item lock-btn">🔒 Lock Session</button></li>
+      </ul>
+    </aside>
+
+    <div class="main-content">
+      
+      <header class="top-header">
+        <div class="header-title">
+          <h1>Analytics Dashboard</h1>
+          <p>Welcome back to your private school portal.</p>
+        </div>
+        <div class="user-badge">
+          <span class="user-avatar">👤</span>
+          <span class="user-name">Student</span>
+        </div>
+      </header>
+
+      <main class="dashboard-grid">
+        
+        <div class="card card-large">
+          <div class="card-header">
+            <div>
+              <h3>Study Bandwidth & Activity</h3>
+              <p class="text-muted">Weekly task completion and study hours</p>
+            </div>
+            <span class="badge cyan-badge">Live</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="activityChart"></canvas>
+          </div>
+        </div>
+
+        <div class="stat-stack">
+          
+          <div class="card stat-card cyan-glow">
+            <div class="stat-info">
+              <span class="stat-number">12</span>
+              <span class="stat-label">Active Notes</span>
+            </div>
+            <a href="notes.html" class="card-link">View All →</a>
+          </div>
+
+          <div class="card stat-card blue-glow">
+            <div class="stat-info">
+              <span class="stat-number">94.8%</span>
+              <span class="stat-label">Class Attendance</span>
+            </div>
+            <span class="stat-badge">Target: 90%</span>
+          </div>
+
+          <div class="card stat-card ice-glow">
+            <div class="stat-info">
+              <span class="stat-number">$45.00</span>
+              <span class="stat-label">Weekly Budget Remaining</span>
+            </div>
+            <span class="stat-badge">On Track</span>
+          </div>
+
+        </div>
+
+      </main>
+
+      <footer class="dashboard-footer">
+        <p>IceyDomain © 2026 • Powered by Cloudflare & GitHub Codespaces</p>
+        <a href="break-room.html" class="secret-trigger" title="Break Room">☕</a>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

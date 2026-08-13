@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IceyDomain • Notes & Tasks</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="ice-icon">❄️</span>
+        <span class="brand-name">IceyDomain</span>
+      </div>
+
+      <p class="sidebar-label">NAVIGATE</p>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-item">📊 Dashboard</a></li>
+        <li><a href="notes.html" class="nav-item active">📝 Notes & Homework</a></li>
+        <li><a href="https://classroom.google.com" target="_blank" class="nav-item">🏫 Google Classroom ↗</a></li>
+      </ul>
+
+      <p class="sidebar-label">SETTINGS</p>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-item lock-btn">🔒 Back to Hub</a></li>
+      </ul>
+    </aside>
+
+    <div class="main-content">
+      
+      <header class="top-header">
+        <div class="header-title">
+          <h1>Notes & Homework Hub</h1>
+          <p>Organize your study notes and daily to-do items.</p>
+        </div>
+        <div class="user-badge">
+          <span class="user-avatar">👤</span>
+          <span class="user-name">Student</span>
+        </div>
+      </header>
+
+      <main class="dashboard-grid">
+        
+        <div class="card">
+          <div class="card-header">
+            <h3>⚡ Homework & Tasks</h3>
+            <span class="badge cyan-badge">Auto-Saved</span>
+          </div>
+
+          <form id="todoForm" class="input-group">
+            <input type="text" id="todoInput" placeholder="Add a new task (e.g. Math Pg. 42)..." required />
+            <button type="submit" class="btn-primary-sm">Add Task</button>
+          </form>
+
+          <ul id="todoList" class="todo-list">
+            </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>📝 Quick Notepad</h3>
+            <span class="badge cyan-badge">Drafts</span>
+          </div>
+
+          <form id="noteForm" class="input-group-vertical">
+            <input type="text" id="noteTitle" placeholder="Note Subject / Title..." required />
+            <textarea id="noteBody" placeholder="Write your study notes here..." rows="4" required></textarea>
+            <button type="submit" class="btn-primary-sm">Save Note</button>
+          </form>
+
+          <div id="notesContainer" class="notes-container">
+            </div>
+        </div>
+
+      </main>
+
+      <footer class="dashboard-footer">
+        <p>IceyDomain © 2026 • Saved locally in browser</p>
+        <a href="secret-break.html" class="secret-trigger" title="Break Room">☕</a>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
