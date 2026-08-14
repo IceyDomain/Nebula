@@ -1,9 +1,9 @@
-// Version Check
+// Version Control
 if (localStorage.getItem('nebula_version') !== '3.0') {
   localStorage.setItem('nebula_version', '3.0');
 }
 
-// Default Hardcoded Accounts
+// Built-in Default Users
 const DEFAULT_USERS = {
   "iceydomain": {
     password: "theicedomain123",
@@ -67,7 +67,7 @@ if (togglePasswordBtn && passwordInput) {
   });
 }
 
-// Session Check (Keep logged in as THAT user)
+// Session Check (Keep logged in as THAT active user)
 const currentSessionUser = sessionStorage.getItem('activeUser');
 if (currentSessionUser) {
   loadDashboard(currentSessionUser);
@@ -92,11 +92,11 @@ if (loginForm) {
       }
     } else {
       if (allUsers[username]) {
-        errorMessage.textContent = 'Username already exists! Choose another.';
+        errorMessage.textContent = 'Username already exists! Pick another one.';
         return;
       }
 
-      // New Accounts default to regular 'user' role
+      // Registered users default to standard 'user'
       customUsers[username] = {
         password: password,
         role: "user",
@@ -134,12 +134,12 @@ function loadDashboard(username) {
   if (activeUserDisplay) activeUserDisplay.textContent = user.name;
   if (userRoleBadge) userRoleBadge.textContent = user.role.toUpperCase();
 
-  // Reset classes
+  // Reset theme state
   document.body.classList.remove('theme-iceydomain', 'theme-admin');
 
-  // PERMISSION & THEME CONTROLS
+  // ROLE CONTROLS
   if (username === 'iceydomain' || user.role === 'owner') {
-    // 1. OWNER LEVEL
+    // OWNER PRIVILEGES
     document.body.classList.add('theme-iceydomain');
     if (brandTitle) brandTitle.textContent = "IceyDomain";
     if (brandIcon) brandIcon.textContent = "❄️";
@@ -148,7 +148,7 @@ function loadDashboard(username) {
     if (adminPanelNavItem) adminPanelNavItem.classList.remove('hidden');
 
   } else if (user.role === 'admin') {
-    // 2. ADMIN LEVEL (Future admins)
+    // ADMIN PRIVILEGES
     document.body.classList.add('theme-admin');
     if (brandTitle) brandTitle.textContent = "Nebula Admin";
     if (brandIcon) brandIcon.textContent = "🛡️";
@@ -157,7 +157,7 @@ function loadDashboard(username) {
     if (secretTrigger) secretTrigger.classList.add('hidden');
 
   } else {
-    // 3. REGULAR USER / GUEST LEVEL
+    // STANDARD MEMBER
     if (brandTitle) brandTitle.textContent = "Nebula";
     if (brandIcon) brandIcon.textContent = "🌌";
     if (adminPanelNavItem) adminPanelNavItem.classList.add('hidden');
@@ -168,7 +168,7 @@ function loadDashboard(username) {
   initChart();
 }
 
-// Chart Render
+// Chart Initializer
 function initChart() {
   const ctx = document.getElementById('activityChart');
   if (!ctx) return;

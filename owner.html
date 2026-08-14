@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IceyDomain • Owner Dev Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body id="userBody" class="theme-iceydomain">
+
+  <div class="dashboard-wrapper">
+    
+    <aside class="sidebar">
+      <div class="brand">
+        <span id="brandIcon" class="ice-icon">❄️</span>
+        <span id="brandTitle" class="brand-name">IceyDomain</span>
+      </div>
+
+      <p class="sidebar-label">NAVIGATE</p>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-item">📊 Dashboard</a></li>
+        <li><a href="notes.html" class="nav-item">📝 Notes & Tasks</a></li>
+        <li><a href="admin.html" class="nav-item">🛡️ Admin Panel</a></li>
+        
+        <li id="ownerPortalNavItem"><a href="owner.html" class="nav-item active owner-link">👑 Owner Dev Portal</a></li>
+      </ul>
+
+      <p class="sidebar-label">ACCOUNT</p>
+      <ul class="nav-menu">
+        <li><button id="logoutBtn" class="nav-item lock-btn">🚪 Sign Out</button></li>
+      </ul>
+    </aside>
+
+    <div class="main-content">
+      
+      <header class="top-header">
+        <div class="header-title">
+          <h1>👑 Owner Developer Suite</h1>
+          <p>Master configuration & private experimental zone.</p>
+        </div>
+        <div class="user-badge">
+          <span class="pulse-dot"></span>
+          <span id="activeUserDisplay" class="user-name">IceyDomain</span>
+          <span id="userRoleBadge" class="role-tag">OWNER</span>
+        </div>
+      </header>
+
+      <main class="dashboard-grid">
+        
+        <div class="main-column">
+          <div class="card" style="border-color: rgba(56, 189, 248, 0.4);">
+            <div class="card-header">
+              <h3>🧪 Developer Sandbox & Master Controls</h3>
+            </div>
+            <p class="text-muted" style="margin-bottom: 20px;">
+              Welcome back, Owner. This private area is hidden from all admins and regular members. Use this page for high-level site configurations or dev tools you plan to build.
+            </p>
+            
+            <div style="background: rgba(3, 7, 18, 0.8); padding: 16px; border-radius: 10px; border: 1px solid var(--border-color); font-family: monospace; font-size: 13px; color: #38bdf8;">
+              > Status: Owner System Online<br>
+              > Core Engine: v3.0<br>
+              > Access Rights: Unlimited (Full Control)
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-stack">
+          <div class="card stat-card" style="border-color: rgba(56, 189, 248, 0.4);">
+            <div class="stat-info">
+              <span class="stat-number" style="color: #38bdf8;">MASTER</span>
+              <span class="stat-label">System Tier</span>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <footer class="dashboard-footer">
+        <p>IceyDomain Master Workspace • 2026</p>
+      </footer>
+
+    </div>
+
+  </div>
+
+  <script src="auth-check.js"></script>
+</body>
+</html>

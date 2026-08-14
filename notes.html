@@ -3,30 +3,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IceyDomain • Notes & Tasks</title>
+  <title>Nebula • Notes & Tasks</title>
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Clean inputs & containers matching the UI */
+    .task-input-group, .note-input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .app-input, .app-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(3, 7, 18, 0.7);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+      outline: none;
+    }
+    .app-input:focus, .app-textarea:focus {
+      border-color: var(--accent-cyan);
+    }
+    .app-textarea {
+      resize: vertical;
+      min-height: 100px;
+      margin-bottom: 10px;
+    }
+    .item-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .item-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(3, 7, 18, 0.5);
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+    }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #f87171;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  </style>
 </head>
-<body>
+<body id="userBody">
 
   <div class="dashboard-wrapper">
     
     <aside class="sidebar">
       <div class="brand">
-        <span class="ice-icon">❄️</span>
-        <span class="brand-name">IceyDomain</span>
+        <span id="brandIcon" class="ice-icon">🌌</span>
+        <span id="brandTitle" class="brand-name">Nebula</span>
       </div>
 
       <p class="sidebar-label">NAVIGATE</p>
       <ul class="nav-menu">
         <li><a href="index.html" class="nav-item">📊 Dashboard</a></li>
-        <li><a href="notes.html" class="nav-item active">📝 Notes & Homework</a></li>
-        <li><a href="https://classroom.google.com" target="_blank" class="nav-item">🏫 Google Classroom ↗</a></li>
+        <li><a href="notes.html" class="nav-item active">📝 Notes & Tasks</a></li>
+        
+        <li id="adminPanelNavItem" class="hidden"><a href="admin.html" class="nav-item">🛡️ Admin Panel</a></li>
+        
+        <li id="ownerPortalNavItem" class="hidden"><a href="owner.html" class="nav-item owner-link">👑 Owner Dev Portal</a></li>
       </ul>
 
-      <p class="sidebar-label">SETTINGS</p>
+      <p class="sidebar-label">ACCOUNT</p>
       <ul class="nav-menu">
-        <li><a href="index.html" class="nav-item lock-btn">🔒 Back to Hub</a></li>
+        <li><button id="logoutBtn" class="nav-item lock-btn">🚪 Sign Out</button></li>
       </ul>
     </aside>
 
@@ -34,59 +88,156 @@
       
       <header class="top-header">
         <div class="header-title">
-          <h1>Notes & Homework Hub</h1>
-          <p>Organize your study notes and daily to-do items.</p>
+          <h1>📝 Notes & Workspace Hub</h1>
+          <p>Organize your personal tasks and workspace notes.</p>
         </div>
         <div class="user-badge">
-          <span class="user-avatar">👤</span>
-          <span class="user-name">Student</span>
+          <span class="pulse-dot"></span>
+          <span id="activeUserDisplay" class="user-name">User</span>
+          <span id="userRoleBadge" class="role-tag">MEMBER</span>
         </div>
       </header>
 
       <main class="dashboard-grid">
         
-        <div class="card">
-          <div class="card-header">
-            <h3>⚡ Homework & Tasks</h3>
-            <span class="badge cyan-badge">Auto-Saved</span>
+        <div class="main-column">
+          <div class="card">
+            <div class="card-header">
+              <h3>⚡ Tasks & To-Do List</h3>
+            </div>
+            <div class="task-input-group">
+              <input type="text" id="taskInput" class="app-input" placeholder="Add a new task..." />
+              <button id="addTaskBtn" class="btn-primary" style="width: auto; padding: 0 20px;">Add</button>
+            </div>
+            <ul id="taskList" class="item-list">
+              </ul>
           </div>
-
-          <form id="todoForm" class="input-group">
-            <input type="text" id="todoInput" placeholder="Add a new task (e.g. Math Pg. 42)..." required />
-            <button type="submit" class="btn-primary-sm">Add Task</button>
-          </form>
-
-          <ul id="todoList" class="todo-list">
-            </ul>
         </div>
 
-        <div class="card">
-          <div class="card-header">
-            <h3>📝 Quick Notepad</h3>
-            <span class="badge cyan-badge">Drafts</span>
-          </div>
-
-          <form id="noteForm" class="input-group-vertical">
-            <input type="text" id="noteTitle" placeholder="Note Subject / Title..." required />
-            <textarea id="noteBody" placeholder="Write your study notes here..." rows="4" required></textarea>
-            <button type="submit" class="btn-primary-sm">Save Note</button>
-          </form>
-
-          <div id="notesContainer" class="notes-container">
+        <div class="stat-stack">
+          <div class="card">
+            <div class="card-header">
+              <h3>📌 Quick Notepad</h3>
             </div>
+            <input type="text" id="noteTitle" class="app-input" placeholder="Note Title..." style="margin-bottom: 10px;" />
+            <textarea id="noteContent" class="app-textarea" placeholder="Write your notes here..."></textarea>
+            <button id="saveNoteBtn" class="btn-primary">Save Note</button>
+            
+            <div style="margin-top: 20px;">
+              <h4 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Saved Notes</h4>
+              <ul id="notesList" class="item-list">
+                </ul>
+            </div>
+          </div>
         </div>
 
       </main>
 
       <footer class="dashboard-footer">
-        <p>IceyDomain © 2026 • Saved locally in browser</p>
-        <a href="secret-break.html" class="secret-trigger" title="Break Room">☕</a>
+        <p id="footerBrand">Nebula Workspace • 2026</p>
+        <a href="owner.html" id="secretTrigger" class="secret-trigger hidden" title="Owner Room">☕</a>
       </footer>
 
     </div>
 
   </div>
 
-  <script src="script.js"></script>
+  <script src="auth-check.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const activeUser = sessionStorage.getItem('activeUser') || 'guest';
+      
+      const taskInput = document.getElementById('taskInput');
+      const addTaskBtn = document.getElementById('addTaskBtn');
+      const taskList = document.getElementById('taskList');
+
+      const noteTitle = document.getElementById('noteTitle');
+      const noteContent = document.getElementById('noteContent');
+      const saveNoteBtn = document.getElementById('saveNoteBtn');
+      const notesList = document.getElementById('notesList');
+
+      // User-specific keys so user data doesn't cross over
+      const TASKS_KEY = `nebula_tasks_${activeUser}`;
+      const NOTES_KEY = `nebula_notes_${activeUser}`;
+
+      // Load Saved Tasks
+      function loadTasks() {
+        const tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]');
+        taskList.innerHTML = tasks.length === 0 ? '<li style="color: var(--text-muted); font-size: 13px;">No tasks added yet.</li>' : '';
+        tasks.forEach((task, index) => {
+          const li = document.createElement('li');
+          li.className = 'item-card';
+          li.innerHTML = `
+            <span>${task}</span>
+            <button class="delete-btn" onclick="deleteTask(${index})">✕</button>
+          `;
+          taskList.appendChild(li);
+        });
+      }
+
+      // Load Saved Notes
+      function loadNotes() {
+        const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+        notesList.innerHTML = notes.length === 0 ? '<li style="color: var(--text-muted); font-size: 13px;">No saved notes.</li>' : '';
+        notes.forEach((note, index) => {
+          const li = document.createElement('li');
+          li.className = 'item-card';
+          li.style.flexDirection = 'column';
+          li.style.alignItems = 'flex-start';
+          li.innerHTML = `
+            <div style="display: flex; justify-content: space-between; width: 100%; font-weight: 600; margin-bottom: 4px;">
+              <span>${note.title}</span>
+              <button class="delete-btn" onclick="deleteNote(${index})">✕</button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 12px; margin: 0;">${note.content}</p>
+          `;
+          notesList.appendChild(li);
+        });
+      }
+
+      // Add Task
+      addTaskBtn.addEventListener('click', () => {
+        const val = taskInput.value.trim();
+        if (!val) return;
+        const tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]');
+        tasks.push(val);
+        localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+        taskInput.value = '';
+        loadTasks();
+      });
+
+      // Save Note
+      saveNoteBtn.addEventListener('click', () => {
+        const title = noteTitle.value.trim();
+        const content = noteContent.value.trim();
+        if (!title || !content) return;
+        const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+        notes.push({ title, content });
+        localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+        noteTitle.value = '';
+        noteContent.value = '';
+        loadNotes();
+      });
+
+      // Global delete functions
+      window.deleteTask = function(index) {
+        const tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]');
+        tasks.splice(index, 1);
+        localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+        loadTasks();
+      };
+
+      window.deleteNote = function(index) {
+        const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+        notes.splice(index, 1);
+        localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+        loadNotes();
+      };
+
+      loadTasks();
+      loadNotes();
+    });
+  </script>
 </body>
 </html>
