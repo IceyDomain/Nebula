@@ -1,15 +1,64 @@
-// --- Password & Unlock System ---
-const MY_PASSWORD = "theicedomain123"; // Change this to your desired password
+// Version Check
+if (localStorage.getItem('nebula_version') !== '3.0') {
+  localStorage.setItem('nebula_version', '3.0');
+}
 
-const loginOverlay = document.getElementById('loginOverlay');
-const protectedContent = document.getElementById('protectedContent');
+// Default Hardcoded Accounts
+const DEFAULT_USERS = {
+  "iceydomain": {
+    password: "theicedomain123",
+    role: "owner",
+    name: "IceyDomain (Owner)"
+  },
+  "guest": {
+    password: "guest123",
+    role: "user",
+    name: "Guest User"
+  }
+};
+
+let authMode = 'signin';
+
+// DOM Elements
 const loginForm = document.getElementById('loginForm');
+const usernameInput = document.getElementById('usernameInput');
 const passwordInput = document.getElementById('passwordInput');
 const errorMessage = document.getElementById('errorMessage');
+const loginOverlay = document.getElementById('loginOverlay');
+const protectedContent = document.getElementById('protectedContent');
 const logoutBtn = document.getElementById('logoutBtn');
-const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+const activeUserDisplay = document.getElementById('activeUserDisplay');
+const userRoleBadge = document.getElementById('userRoleBadge');
+const secretTrigger = document.getElementById('secretTrigger');
+const adminPanelNavItem = document.getElementById('adminPanelNavItem');
+const ownerPortalNavItem = document.getElementById('ownerPortalNavItem');
+const brandTitle = document.getElementById('brandTitle');
+const brandIcon = document.getElementById('brandIcon');
+const submitAuthBtn = document.getElementById('submitAuthBtn');
+const tabSignIn = document.getElementById('tabSignIn');
+const tabSignUp = document.getElementById('tabSignUp');
 
-// 1. Password Visibility Toggle
+// Tabs Switcher
+if (tabSignIn && tabSignUp) {
+  tabSignIn.addEventListener('click', () => {
+    authMode = 'signin';
+    tabSignIn.classList.add('active');
+    tabSignUp.classList.remove('active');
+    submitAuthBtn.textContent = 'Sign In →';
+    errorMessage.textContent = '';
+  });
+
+  tabSignUp.addEventListener('click', () => {
+    authMode = 'signup';
+    tabSignUp.classList.add('active');
+    tabSignIn.classList.remove('active');
+    submitAuthBtn.textContent = 'Create Account →';
+    errorMessage.textContent = '';
+  });
+}
+
+// Password Visibility Eye Toggle
+const togglePasswordBtn = document.getElementById('togglePasswordBtn');
 if (togglePasswordBtn && passwordInput) {
   togglePasswordBtn.addEventListener('click', () => {
     const isPassword = passwordInput.type === 'password';
@@ -18,38 +67,108 @@ if (togglePasswordBtn && passwordInput) {
   });
 }
 
-// 2. Session Check
-if (sessionStorage.getItem('isUnlocked') === 'true') {
-  unlockSite();
+// Session Check (Keep logged in as THAT user)
+const currentSessionUser = sessionStorage.getItem('activeUser');
+if (currentSessionUser) {
+  loadDashboard(currentSessionUser);
 }
 
+// Form Submission
 if (loginForm) {
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (passwordInput.value === MY_PASSWORD) {
-      sessionStorage.setItem('isUnlocked', 'true');
-      unlockSite();
+    const username = usernameInput.value.trim().toLowerCase();
+    const password = passwordInput.value;
+
+    const customUsers = JSON.parse(localStorage.getItem('nebula_accounts') || '{}');
+    const allUsers = { ...DEFAULT_USERS, ...customUsers };
+
+    if (authMode === 'signin') {
+      if (allUsers[username] && allUsers[username].password === password) {
+        sessionStorage.setItem('activeUser', username);
+        loadDashboard(username);
+      } else {
+        errorMessage.textContent = 'Invalid username or password.';
+      }
     } else {
-      errorMessage.textContent = 'Incorrect password. Try again!';
-      passwordInput.value = '';
+      if (allUsers[username]) {
+        errorMessage.textContent = 'Username already exists! Choose another.';
+        return;
+      }
+
+      // New Accounts default to regular 'user' role
+      customUsers[username] = {
+        password: password,
+        role: "user",
+        name: username.charAt(0).toUpperCase() + username.slice(1)
+      };
+      
+      localStorage.setItem('nebula_accounts', JSON.stringify(customUsers));
+      sessionStorage.setItem('activeUser', username);
+      loadDashboard(username);
     }
   });
 }
 
+// Logout
 if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
-    sessionStorage.removeItem('isUnlocked');
+    sessionStorage.removeItem('activeUser');
     location.reload();
   });
 }
 
-function unlockSite() {
+// Load Dashboard & Role-based Access
+function loadDashboard(username) {
+  const customUsers = JSON.parse(localStorage.getItem('nebula_accounts') || '{}');
+  const allUsers = { ...DEFAULT_USERS, ...customUsers };
+  
+  const user = allUsers[username] || { 
+    name: username.charAt(0).toUpperCase() + username.slice(1), 
+    role: "user" 
+  };
+
   if (loginOverlay) loginOverlay.classList.add('hidden');
   if (protectedContent) protectedContent.classList.remove('hidden');
+
+  if (activeUserDisplay) activeUserDisplay.textContent = user.name;
+  if (userRoleBadge) userRoleBadge.textContent = user.role.toUpperCase();
+
+  // Reset classes
+  document.body.classList.remove('theme-iceydomain', 'theme-admin');
+
+  // PERMISSION & THEME CONTROLS
+  if (username === 'iceydomain' || user.role === 'owner') {
+    // 1. OWNER LEVEL
+    document.body.classList.add('theme-iceydomain');
+    if (brandTitle) brandTitle.textContent = "IceyDomain";
+    if (brandIcon) brandIcon.textContent = "❄️";
+    if (secretTrigger) secretTrigger.classList.remove('hidden');
+    if (ownerPortalNavItem) ownerPortalNavItem.classList.remove('hidden');
+    if (adminPanelNavItem) adminPanelNavItem.classList.remove('hidden');
+
+  } else if (user.role === 'admin') {
+    // 2. ADMIN LEVEL (Future admins)
+    document.body.classList.add('theme-admin');
+    if (brandTitle) brandTitle.textContent = "Nebula Admin";
+    if (brandIcon) brandIcon.textContent = "🛡️";
+    if (adminPanelNavItem) adminPanelNavItem.classList.remove('hidden');
+    if (ownerPortalNavItem) ownerPortalNavItem.classList.add('hidden');
+    if (secretTrigger) secretTrigger.classList.add('hidden');
+
+  } else {
+    // 3. REGULAR USER / GUEST LEVEL
+    if (brandTitle) brandTitle.textContent = "Nebula";
+    if (brandIcon) brandIcon.textContent = "🌌";
+    if (adminPanelNavItem) adminPanelNavItem.classList.add('hidden');
+    if (ownerPortalNavItem) ownerPortalNavItem.classList.add('hidden');
+    if (secretTrigger) secretTrigger.classList.add('hidden');
+  }
+
   initChart();
 }
 
-// --- Chart.js Graph ---
+// Chart Render
 function initChart() {
   const ctx = document.getElementById('activityChart');
   if (!ctx) return;
@@ -57,10 +176,10 @@ function initChart() {
   new Chart(ctx, {
     type: 'line',
     data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
       datasets: [{
-        label: 'Study Hours',
-        data: [2.5, 4.0, 3.2, 5.1, 2.8, 6.0, 4.5],
+        label: 'System Bandwidth',
+        data: [4, 7, 3, 9, 8],
         borderColor: '#38bdf8',
         backgroundColor: 'rgba(56, 189, 248, 0.1)',
         fill: true,
@@ -70,163 +189,7 @@ function initChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
-        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
-      }
+      plugins: { legend: { display: false } }
     }
   });
-}
-
-// --- To-Do & Notes Logic ---
-document.addEventListener('DOMContentLoaded', () => {
-  renderTodos();
-  renderNotes();
-});
-
-const todoForm = document.getElementById('todoForm');
-const todoInput = document.getElementById('todoInput');
-const todoList = document.getElementById('todoList');
-
-if (todoForm) {
-  todoForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!todoInput.value.trim()) return;
-
-    const tasks = JSON.parse(localStorage.getItem('icey_todos') || '[]');
-    tasks.push({ text: todoInput.value, completed: false });
-    localStorage.setItem('icey_todos', JSON.stringify(tasks));
-    todoInput.value = '';
-    renderTodos();
-  });
-}
-
-function renderTodos() {
-  if (!todoList) return;
-  const tasks = JSON.parse(localStorage.getItem('icey_todos') || '[]');
-  todoList.innerHTML = '';
-
-  tasks.forEach((task, index) => {
-    const li = document.createElement('li');
-    li.className = `todo-item ${task.completed ? 'completed' : ''}`;
-    li.innerHTML = `
-      <span onclick="toggleTask(${index})" style="cursor: pointer;">${task.completed ? '✓ ' : ''}${escapeHtml(task.text)}</span>
-      <button class="delete-btn" onclick="deleteTask(${index})">✕</button>
-    `;
-    todoList.appendChild(li);
-  });
-}
-
-window.toggleTask = function(index) {
-  const tasks = JSON.parse(localStorage.getItem('icey_todos') || '[]');
-  tasks[index].completed = !tasks[index].completed;
-  localStorage.setItem('icey_todos', JSON.stringify(tasks));
-  renderTodos();
-};
-
-window.deleteTask = function(index) {
-  const tasks = JSON.parse(localStorage.getItem('icey_todos') || '[]');
-  tasks.splice(index, 1);
-  localStorage.setItem('icey_todos', JSON.stringify(tasks));
-  renderTodos();
-};
-
-const noteForm = document.getElementById('noteForm');
-const noteTitle = document.getElementById('noteTitle');
-const noteBody = document.getElementById('noteBody');
-const notesContainer = document.getElementById('notesContainer');
-
-if (noteForm) {
-  noteForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!noteTitle.value.trim() || !noteBody.value.trim()) return;
-
-    const notes = JSON.parse(localStorage.getItem('icey_notes') || '[]');
-    notes.unshift({ title: noteTitle.value, body: noteBody.value });
-    localStorage.setItem('icey_notes', JSON.stringify(notes));
-    noteTitle.value = '';
-    noteBody.value = '';
-    renderNotes();
-  });
-}
-
-function renderNotes() {
-  if (!notesContainer) return;
-  const notes = JSON.parse(localStorage.getItem('icey_notes') || '[]');
-  notesContainer.innerHTML = '';
-
-  if (notes.length === 0) {
-    notesContainer.innerHTML = '<p class="text-muted" style="font-size:12px;">No saved notes yet.</p>';
-    return;
-  }
-
-  notes.forEach((note, index) => {
-    const card = document.createElement('div');
-    card.className = 'note-card';
-    card.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h4>${escapeHtml(note.title)}</h4>
-        <button class="delete-btn" onclick="deleteNote(${index})">✕</button>
-      </div>
-      <p>${escapeHtml(note.body)}</p>
-    `;
-    notesContainer.appendChild(card);
-  });
-}
-
-window.deleteNote = function(index) {
-  const notes = JSON.parse(localStorage.getItem('icey_notes') || '[]');
-  notes.splice(index, 1);
-  localStorage.setItem('icey_notes', JSON.stringify(notes));
-  renderNotes();
-};
-
-function escapeHtml(str) {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
-// --- Rest Timer Logic ---
-const timerText = document.getElementById('timerText');
-const startTimerBtn = document.getElementById('startTimerBtn');
-const resetTimerBtn = document.getElementById('resetTimerBtn');
-
-let timerInterval = null;
-let timeRemaining = 300;
-
-if (startTimerBtn) {
-  startTimerBtn.addEventListener('click', () => {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      startTimerBtn.textContent = 'Resume Break';
-    } else {
-      startTimerBtn.textContent = 'Pause';
-      timerInterval = setInterval(() => {
-        timeRemaining--;
-        updateTimerDisplay();
-        if (timeRemaining <= 0) {
-          clearInterval(timerInterval);
-          alert('Break time is up!');
-        }
-      }, 1000);
-    }
-  });
-}
-
-if (resetTimerBtn) {
-  resetTimerBtn.addEventListener('click', () => {
-    clearInterval(timerInterval);
-    timerInterval = null;
-    timeRemaining = 300;
-    updateTimerDisplay();
-    startTimerBtn.textContent = 'Start Break';
-  });
-}
-
-function updateTimerDisplay() {
-  if (!timerText) return;
-  const minutes = Math.floor(timeRemaining / 60);
-  const seconds = timeRemaining % 60;
-  timerText.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
