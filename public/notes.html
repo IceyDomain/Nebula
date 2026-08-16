@@ -3,241 +3,365 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nebula • Notes & Tasks</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Nebula Docs - Dashboard</title>
   <style>
-    /* Clean inputs & containers matching the UI */
-    .task-input-group, .note-input-group {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    .app-input, .app-textarea {
-      width: 100%;
-      padding: 10px 14px;
-      background: rgba(3, 7, 18, 0.7);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      color: #fff;
-      font-family: inherit;
-      outline: none;
-    }
-    .app-input:focus, .app-textarea:focus {
-      border-color: var(--accent-cyan);
-    }
-    .app-textarea {
-      resize: vertical;
-      min-height: 100px;
-      margin-bottom: 10px;
-    }
-    .item-list {
-      list-style: none;
+
+    body {
+      background: #0b0d19;
+      background-image: radial-gradient(circle at 50% 0%, #1a1c3b 0%, #0b0d19 75%);
+      color: #e0e6ed;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      max-height: 300px;
-      overflow-y: auto;
     }
-    .item-card {
+
+    header {
+      width: 100%;
+      background: rgba(15, 18, 37, 0.9);
+      border-bottom: 1px solid rgba(110, 86, 207, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 12px 24px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      background: rgba(3, 7, 18, 0.5);
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      font-size: 14px;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .delete-btn {
-      background: none;
-      border: none;
-      color: #f87171;
-      cursor: pointer;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Glowing Nebula Home Button */
+    .nebula-home-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(110, 86, 207, 0.15);
+      border: 1px solid rgba(110, 86, 207, 0.4);
+      color: #a78bfa;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nebula-icon {
+      width: 22px;
+      height: 22px;
+      transition: transform 0.3s ease;
+    }
+
+    .nebula-home-btn:hover {
+      background: rgba(110, 86, 207, 0.4);
+      border-color: #a78bfa;
+      color: #ffffff;
+      box-shadow: 0 0 15px #6e56cf, 0 0 30px #38bdf8;
+      transform: scale(1.1);
+    }
+
+    .nebula-home-btn:hover .nebula-icon {
+      transform: rotate(45deg);
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .search-bar {
+      flex: 0 1 600px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(110, 86, 207, 0.3);
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #ffffff;
       font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-bar input:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #6e56cf;
+      box-shadow: 0 0 12px rgba(110, 86, 207, 0.3);
+    }
+
+    .search-bar input::placeholder {
+      color: #94a3b8;
+    }
+
+    .template-section {
+      background: rgba(21, 25, 50, 0.5);
+      border-bottom: 1px solid rgba(110, 86, 207, 0.2);
+      padding: 24px 10%;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .template-grid {
+      display: flex;
+      gap: 20px;
+    }
+
+    .template-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+      width: 140px;
+    }
+
+    .template-preview {
+      width: 140px;
+      height: 180px;
+      background: #121528;
+      border: 1px solid rgba(110, 86, 207, 0.3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .template-card:hover .template-preview {
+      border-color: #6e56cf;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(110, 86, 207, 0.25);
+    }
+
+    .plus-icon {
+      font-size: 36px;
+      color: #6e56cf;
+      font-weight: 300;
+    }
+
+    .template-name {
+      font-size: 13px;
+      color: #e0e6ed;
+      font-weight: 500;
+    }
+
+    .documents-section {
+      padding: 30px 10%;
+      flex: 1;
+    }
+
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 24px;
+    }
+
+    .doc-card {
+      background: #121528;
+      border: 1px solid rgba(110, 86, 207, 0.25);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .doc-card:hover {
+      border-color: #6e56cf;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(110, 86, 207, 0.3);
+    }
+
+    .doc-preview {
+      height: 160px;
+      padding: 16px;
+      background: #0f1225;
+      font-size: 9px;
+      color: #64748b;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      user-select: none;
+    }
+
+    .doc-info {
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .doc-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .doc-date {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(239, 68, 68, 0.8);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .doc-card:hover .delete-btn {
+      display: block;
     }
   </style>
 </head>
-<body id="userBody">
+<body>
 
-  <div class="dashboard-wrapper">
-    
-    <aside class="sidebar">
-      <div class="brand">
-        <span id="brandIcon" class="ice-icon">🌌</span>
-        <span id="brandTitle" class="brand-name">Nebula</span>
-      </div>
-
-      <p class="sidebar-label">NAVIGATE</p>
-      <ul class="nav-menu">
-        <li><a href="index.html" class="nav-item">📊 Dashboard</a></li>
-        <li><a href="notes.html" class="nav-item active">📝 Notes & Tasks</a></li>
-        
-        <li id="adminPanelNavItem" class="hidden"><a href="admin.html" class="nav-item">🛡️ Admin Panel</a></li>
-        
-        <li id="ownerPortalNavItem" class="hidden"><a href="owner.html" class="nav-item owner-link">👑 Owner Dev Portal</a></li>
-      </ul>
-
-      <p class="sidebar-label">ACCOUNT</p>
-      <ul class="nav-menu">
-        <li><button id="logoutBtn" class="nav-item lock-btn">🚪 Sign Out</button></li>
-      </ul>
-    </aside>
-
-    <div class="main-content">
-      
-      <header class="top-header">
-        <div class="header-title">
-          <h1>📝 Notes & Workspace Hub</h1>
-          <p>Organize your personal tasks and workspace notes.</p>
-        </div>
-        <div class="user-badge">
-          <span class="pulse-dot"></span>
-          <span id="activeUserDisplay" class="user-name">User</span>
-          <span id="userRoleBadge" class="role-tag">MEMBER</span>
-        </div>
-      </header>
-
-      <main class="dashboard-grid">
-        
-        <div class="main-column">
-          <div class="card">
-            <div class="card-header">
-              <h3>⚡ Tasks & To-Do List</h3>
-            </div>
-            <div class="task-input-group">
-              <input type="text" id="taskInput" class="app-input" placeholder="Add a new task..." />
-              <button id="addTaskBtn" class="btn-primary" style="width: auto; padding: 0 20px;">Add</button>
-            </div>
-            <ul id="taskList" class="item-list">
-              </ul>
-          </div>
-        </div>
-
-        <div class="stat-stack">
-          <div class="card">
-            <div class="card-header">
-              <h3>📌 Quick Notepad</h3>
-            </div>
-            <input type="text" id="noteTitle" class="app-input" placeholder="Note Title..." style="margin-bottom: 10px;" />
-            <textarea id="noteContent" class="app-textarea" placeholder="Write your notes here..."></textarea>
-            <button id="saveNoteBtn" class="btn-primary">Save Note</button>
-            
-            <div style="margin-top: 20px;">
-              <h4 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Saved Notes</h4>
-              <ul id="notesList" class="item-list">
-                </ul>
-            </div>
-          </div>
-        </div>
-
-      </main>
-
-      <footer class="dashboard-footer">
-        <p id="footerBrand">Nebula Workspace • 2026</p>
-        <a href="owner.html" id="secretTrigger" class="secret-trigger hidden" title="Owner Room">☕</a>
-      </footer>
-
+  <header>
+    <div class="header-left">
+      <a href="index.html" class="nebula-home-btn" title="Return to Nebula">
+        <svg class="nebula-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+          <path d="M12 6a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor"/>
+        </svg>
+      </a>
+      <div class="logo">Nebula Docs</div>
     </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search document titles..." onkeyup="filterDocs()">
+    </div>
+    <div></div>
+  </header>
 
+  <div class="template-section">
+    <div class="section-title">Start a new document</div>
+    <div class="template-grid">
+      <div class="template-card" onclick="createNewDoc()">
+        <div class="template-preview">
+          <span class="plus-icon">+</span>
+        </div>
+        <span class="template-name">Blank document</span>
+      </div>
+    </div>
   </div>
 
-  <script src="auth-check.js"></script>
+  <div class="documents-section">
+    <div class="section-title">Recent documents</div>
+    <div class="docs-grid" id="docsGrid"></div>
+  </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const activeUser = sessionStorage.getItem('activeUser') || 'guest';
+    function getStoredDocs() {
+      return JSON.parse(localStorage.getItem('nebula_docs_list') || '[]');
+    }
+
+    function loadDocuments() {
+      const docsGrid = document.getElementById('docsGrid');
+      docsGrid.innerHTML = '';
+      const docs = getStoredDocs();
+
+      if (docs.length === 0) {
+        docsGrid.innerHTML = '<p style="color: #94a3b8; grid-column: 1/-1;">No documents found. Click "+ Blank document" to create one.</p>';
+        return;
+      }
+
+      docs.forEach(doc => {
+        const docCard = document.createElement('div');
+        docCard.className = 'doc-card';
+        
+        const plainText = (doc.content || '').replace(/<[^>]*>?/gm, '');
+
+        docCard.innerHTML = `
+          <button class="delete-btn" onclick="deleteDoc(event, '${doc.id}')">Delete</button>
+          <div class="doc-preview" onclick="openDoc('${doc.id}')">${plainText || 'Empty document...'}</div>
+          <div class="doc-info" onclick="openDoc('${doc.id}')">
+            <div class="doc-card-title">${doc.title || 'Untitled document'}</div>
+            <div class="doc-date">${doc.updatedAt ? new Date(doc.updatedAt).toLocaleDateString() : 'Recently'}</div>
+          </div>
+        `;
+
+        docsGrid.appendChild(docCard);
+      });
+    }
+
+    function createNewDoc() {
+      const newId = 'doc_' + Date.now();
+      const docs = getStoredDocs();
       
-      const taskInput = document.getElementById('taskInput');
-      const addTaskBtn = document.getElementById('addTaskBtn');
-      const taskList = document.getElementById('taskList');
-
-      const noteTitle = document.getElementById('noteTitle');
-      const noteContent = document.getElementById('noteContent');
-      const saveNoteBtn = document.getElementById('saveNoteBtn');
-      const notesList = document.getElementById('notesList');
-
-      // User-specific keys so user data doesn't cross over
-      const TASKS_KEY = `nebula_tasks_${activeUser}`;
-      const NOTES_KEY = `nebula_notes_${activeUser}`;
-
-      // Load Saved Tasks
-      function loadTasks() {
-        const tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]');
-        taskList.innerHTML = tasks.length === 0 ? '<li style="color: var(--text-muted); font-size: 13px;">No tasks added yet.</li>' : '';
-        tasks.forEach((task, index) => {
-          const li = document.createElement('li');
-          li.className = 'item-card';
-          li.innerHTML = `
-            <span>${task}</span>
-            <button class="delete-btn" onclick="deleteTask(${index})">✕</button>
-          `;
-          taskList.appendChild(li);
-        });
-      }
-
-      // Load Saved Notes
-      function loadNotes() {
-        const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
-        notesList.innerHTML = notes.length === 0 ? '<li style="color: var(--text-muted); font-size: 13px;">No saved notes.</li>' : '';
-        notes.forEach((note, index) => {
-          const li = document.createElement('li');
-          li.className = 'item-card';
-          li.style.flexDirection = 'column';
-          li.style.alignItems = 'flex-start';
-          li.innerHTML = `
-            <div style="display: flex; justify-content: space-between; width: 100%; font-weight: 600; margin-bottom: 4px;">
-              <span>${note.title}</span>
-              <button class="delete-btn" onclick="deleteNote(${index})">✕</button>
-            </div>
-            <p style="color: var(--text-muted); font-size: 12px; margin: 0;">${note.content}</p>
-          `;
-          notesList.appendChild(li);
-        });
-      }
-
-      // Add Task
-      addTaskBtn.addEventListener('click', () => {
-        const val = taskInput.value.trim();
-        if (!val) return;
-        const tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]');
-        tasks.push(val);
-        localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-        taskInput.value = '';
-        loadTasks();
-      });
-
-      // Save Note
-      saveNoteBtn.addEventListener('click', () => {
-        const title = noteTitle.value.trim();
-        const content = noteContent.value.trim();
-        if (!title || !content) return;
-        const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
-        notes.push({ title, content });
-        localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
-        noteTitle.value = '';
-        noteContent.value = '';
-        loadNotes();
-      });
-
-      // Global delete functions
-      window.deleteTask = function(index) {
-        const tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]');
-        tasks.splice(index, 1);
-        localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-        loadTasks();
+      const newDoc = {
+        id: newId,
+        title: 'Untitled document',
+        content: '<p>Start typing here...</p>',
+        updatedAt: new Date().toISOString()
       };
 
-      window.deleteNote = function(index) {
-        const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
-        notes.splice(index, 1);
-        localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
-        loadNotes();
-      };
+      docs.unshift(newDoc);
+      localStorage.setItem('nebula_docs_list', JSON.stringify(docs));
+      window.location.href = `notes-editor.html?id=${newId}`;
+    }
 
-      loadTasks();
-      loadNotes();
-    });
+    function openDoc(id) {
+      window.location.href = `notes-editor.html?id=${id}`;
+    }
+
+    function deleteDoc(event, id) {
+      event.stopPropagation();
+      if (confirm('Are you sure you want to delete this document?')) {
+        let docs = getStoredDocs();
+        docs = docs.filter(d => d.id !== id);
+        localStorage.setItem('nebula_docs_list', JSON.stringify(docs));
+        loadDocuments();
+      }
+    }
+
+    function filterDocs() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.doc-card');
+      
+      cards.forEach(card => {
+        const title = card.querySelector('.doc-card-title').innerText.toLowerCase();
+        if (title.includes(query)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', loadDocuments);
   </script>
 </body>
 </html>

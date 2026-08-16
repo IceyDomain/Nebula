@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nebula Docs</title>
+  <link rel="stylesheet" href="editor-new.css">
+  <link rel="stylesheet" href="editor-theme-nebula.css">
+</head>
+<body>
+  <!-- Google Docs-style Header -->
+  <div class="app-header">
+    <div class="header-left">
+      <a href="notes.html" class="logo-btn" title="Return to Dashboard">🌌</a>
+      <div class="doc-info">
+        <input type="text" id="docTitle" class="doc-title" value="Untitled document" spellcheck="false">
+        <div class="save-status">
+          <span id="saveIndicator" class="save-dot"></span>
+          <span id="saveText">Saving...</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="header-center">
+      <button id="shareBtn" class="share-btn">🔒 Restricted</button>
+    </div>
+
+    <div class="header-right">
+      <button id="helpBtn" class="icon-btn" title="Help">?</button>
+    </div>
+  </div>
+
+  <!-- Tabs Section -->
+  <div class="tabs-bar">
+    <div class="tabs-container" id="tabsContainer"></div>
+    <button id="addTabBtn" class="add-tab-btn" title="Open another document">+</button>
+  </div>
+
+  <!-- Main Toolbar -->
+  <div class="toolbar-container">
+    <div class="toolbar-left">
+      <div class="menu-wrapper">
+        <button id="menuFileBtn" class="menu-btn">File</button>
+        <div id="fileMenu" class="dropdown-menu hidden">
+          <div class="menu-item" id="menuNew">📄 New</div>
+          <div class="menu-item" id="menuOpen">📂 All Documents</div>
+          <div class="divider"></div>
+          <div class="menu-item" id="menuDownload">⬇️ Download</div>
+          <div class="menu-item" id="menuPrint">🖨️ Print</div>
+        </div>
+      </div>
+
+      <div class="menu-wrapper">
+        <button id="menuEditBtn" class="menu-btn">Edit</button>
+        <div id="editMenu" class="dropdown-menu hidden">
+          <div class="menu-item" id="menuUndo">↶ Undo</div>
+          <div class="menu-item" id="menuRedo">↷ Redo</div>
+          <div class="divider"></div>
+          <div class="menu-item" id="menuSelectAll">✓ Select All</div>
+        </div>
+      </div>
+
+      <button id="menuViewBtn" class="menu-btn">View</button>
+      <button id="menuInsertBtn" class="menu-btn">Insert</button>
+      <button id="menuFormatBtn" class="menu-btn">Format</button>
+      <button id="menuToolsBtn" class="menu-btn">Tools</button>
+    </div>
+
+    <div class="toolbar-main">
+      <button id="btn-undo" class="toolbar-btn" title="Undo">↶</button>
+      <button id="btn-redo" class="toolbar-btn" title="Redo">↷</button>
+      <div class="separator"></div>
+
+      <select id="fontFamily" class="font-select">
+        <option value="Arial">Arial</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Verdana">Verdana</option>
+      </select>
+
+      <select id="fontSize" class="size-select">
+        <option value="10">10</option>
+        <option value="12">12</option>
+        <option value="14" selected>14</option>
+        <option value="16">16</option>
+        <option value="18">18</option>
+        <option value="20">20</option>
+        <option value="24">24</option>
+      </select>
+
+      <div class="separator"></div>
+
+      <button id="btn-bold" class="toolbar-btn" title="Bold"><b>B</b></button>
+      <button id="btn-italic" class="toolbar-btn" title="Italic"><i>I</i></button>
+      <button id="btn-underline" class="toolbar-btn" title="Underline"><u>U</u></button>
+
+      <div class="separator"></div>
+
+      <button id="btn-textColor" class="toolbar-btn color-btn" title="Text color">A</button>
+      <input type="color" id="textColorPicker" class="color-picker hidden" value="#f1f5f9">
+      
+      <button id="btn-highlightColor" class="toolbar-btn color-btn" title="Highlight color">🖍️</button>
+      <input type="color" id="highlightColorPicker" class="color-picker hidden" value="#ffff00">
+
+      <div class="separator"></div>
+
+      <button id="btn-left" class="toolbar-btn" title="Left align">◄</button>
+      <button id="btn-center" class="toolbar-btn" title="Center">■</button>
+      <button id="btn-right" class="toolbar-btn" title="Right align">►</button>
+
+      <div class="separator"></div>
+
+      <button id="btn-ul" class="toolbar-btn" title="Bullet list">•</button>
+      <button id="btn-ol" class="toolbar-btn" title="Numbered list">1</button>
+      <button id="btn-link" class="toolbar-btn" title="Insert link">🔗</button>
+    </div>
+  </div>
+
+  <!-- Main Editor -->
+  <div class="editor-container">
+    <div class="document-wrapper">
+      <div id="editor" class="document-editor" contenteditable="true" spellcheck="true"></div>
+    </div>
+  </div>
+
+  <script src="editor-new.js"></script>
+</body>
+</html>
