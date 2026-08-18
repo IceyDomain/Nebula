@@ -1,0 +1,141 @@
+/* Nebula Theme Enhancements */
+
+/* Dark space background with nebula gradient */
+body {
+  background: radial-gradient(circle at 50% 0%, #1a1c3b 0%, #0f111e 60%);
+}
+
+.app-header {
+  background: linear-gradient(180deg, rgba(18, 22, 39, 0.95) 0%, rgba(15, 17, 30, 0.9) 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced document styling */
+.document-editor {
+  background: linear-gradient(135deg, rgba(26, 30, 54, 0.8) 0%, rgba(24, 28, 50, 0.6) 100%);
+  border: 1px solid rgba(124, 93, 250, 0.2);
+}
+
+.document-editor:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.2), 
+              0 8px 32px rgba(124, 93, 250, 0.1);
+}
+
+/* Text glow effect on hover */
+.document-editor::selection {
+  background: rgba(124, 93, 250, 0.25);
+  color: inherit;
+}
+
+/* Toolbar gradient background */
+.toolbar-container {
+  background: linear-gradient(180deg, transparent 0%, rgba(124, 93, 250, 0.03) 100%);
+  border-bottom-color: rgba(124, 93, 250, 0.1);
+}
+
+/* Nebula accent for buttons */
+.toolbar-btn.active {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
+/* Dropdown menu nebula style */
+.dropdown-menu {
+  background: linear-gradient(180deg, rgba(18, 22, 39, 0.95) 0%, rgba(15, 17, 30, 0.9) 100%);
+  border: 1px solid rgba(124, 93, 250, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+}
+
+.menu-item:hover {
+  background: rgba(124, 93, 250, 0.15);
+  border-left: 3px solid var(--accent-cyan);
+  padding-left: 13px;
+}
+
+/* Cursor styling */
+.document-editor {
+  caret-color: var(--accent-cyan);
+}
+
+/* Link styling */
+.document-editor a {
+  color: var(--accent-cyan);
+  text-decoration: underline;
+}
+
+/* Heading emphasis */
+.document-editor h1,
+.document-editor h2,
+.document-editor h3 {
+  color: var(--text-primary);
+  border-left: 3px solid var(--accent-purple);
+  padding-left: 12px;
+  margin-left: 0;
+}
+
+/* Save indicator nebula effect */
+.save-dot {
+  box-shadow: 0 0 4px currentColor;
+}
+
+.save-dot.saving {
+  animation: pulse-nebula 1s infinite;
+}
+
+@keyframes pulse-nebula {
+  0% {
+    background: #f59e0b;
+    box-shadow: 0 0 6px #f59e0b;
+  }
+  50% {
+    background: #ef4444;
+    box-shadow: 0 0 12px #ef4444;
+  }
+  100% {
+    background: #f59e0b;
+    box-shadow: 0 0 6px #f59e0b;
+  }
+}
+
+/* Scrollbar styling */
+.editor-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.editor-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.editor-container::-webkit-scrollbar-thumb {
+  background: rgba(124, 93, 250, 0.4);
+  border-radius: 4px;
+}
+
+.editor-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 93, 250, 0.6);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .toolbar-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toolbar-main {
+    flex-wrap: wrap;
+  }
+
+  .document-editor {
+    padding: 24px;
+    min-height: auto;
+  }
+
+  .editor-container {
+    padding: 16px;
+  }
+}
