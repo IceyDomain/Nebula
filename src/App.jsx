@@ -7,9 +7,15 @@ import StandardDashboard from './components/StandardDashboard';
 import './App.css';
 
 const INITIAL_USERS = [
-  { username: 'owner', email: 'owner@nebula.com', password: 'ownerpassword123', role: 'owner', credits: 9999 },
-  { username: 'admin1', email: 'admin@nebula.com', password: 'adminpassword123', role: 'admin', adminLevel: 3, credits: 500 },
+  { username: import.meta.env.VITE_OWNER_USERNAME || 'owner', email: 'owner@nebula.com', password: 'ownerpassword123', role: 'owner', credits: 9999, tier: 'Nebula', exp: 0, equippedBorder: 'nebula-pulse', equippedBanner: 'default-space', unlockedBorders: ['none', 'nebula-pulse'], unlockedEmotes: ['rocket', 'star'] },
+  { username: 'admin1', email: 'admin@nebula.com', password: 'adminpassword123', role: 'admin', adminLevel: 3, credits: 500, tier: 'Basic', exp: 0, equippedBorder: 'none', equippedBanner: 'default-space', unlockedBorders: ['none'], unlockedEmotes: ['rocket', 'star'] },
 ];
+
+const DEFAULT_PROFILE_PERKS = { tier: 'Basic', exp: 0, equippedBorder: 'none', equippedBanner: 'default-space', unlockedBorders: ['none'], unlockedEmotes: ['rocket', 'star'] };
+
+function normalizeUser(user) {
+  return { ...DEFAULT_PROFILE_PERKS, ...user, unlockedBorders: Array.isArray(user.unlockedBorders) ? user.unlockedBorders : DEFAULT_PROFILE_PERKS.unlockedBorders, unlockedEmotes: Array.isArray(user.unlockedEmotes) ? user.unlockedEmotes : DEFAULT_PROFILE_PERKS.unlockedEmotes };
+}
 
 function readUsers() {
   try {
@@ -17,7 +23,7 @@ function readUsers() {
     const users = Array.isArray(storedUsers) ? storedUsers : [];
     const normalizedUsers = users
       .filter((user) => user && typeof user === 'object' && (user.username || user.email))
-      .map((user) => ({
+      .map((user) => normalizeUser({
         ...user,
         username: (user.username || user.email.split('@')[0]).trim().toLowerCase(),
         email: (user.email || `${user.username}@nebula.local`).trim().toLowerCase(),
@@ -61,7 +67,7 @@ function App() {
         setIsSignUp(false);
         return;
       }
-      const newUser = { username: normalizedUsername, email: normalizedEmail, password, role: 'user', credits: 1000 };
+      const newUser = normalizeUser({ username: normalizedUsername, email: normalizedEmail, password, role: 'user', credits: 1000 });
       localStorage.setItem('nebula_users', JSON.stringify([...users, newUser]));
       localStorage.setItem('nebula_active_user', JSON.stringify(newUser));
       setCurrentUser(newUser);
@@ -74,8 +80,9 @@ function App() {
         alert('Invalid credentials.');
         return;
       }
-      localStorage.setItem('nebula_active_user', JSON.stringify(foundUser));
-      setCurrentUser(foundUser);
+      const normalizedUser = normalizeUser(foundUser);
+      localStorage.setItem('nebula_active_user', JSON.stringify(normalizedUser));
+      setCurrentUser(normalizedUser);
     }
     setIsModalOpen(false);
   };

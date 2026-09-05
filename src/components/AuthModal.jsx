@@ -25,6 +25,12 @@ export default function AuthModal({
     event.preventDefault();
   };
 
+  const handleGoogleSignIn = () => {
+    alert(import.meta.env.VITE_GOOGLE_CLIENT_ID
+      ? 'Google OAuth needs a configured identity provider callback before sign-in can be enabled.'
+      : 'Google sign-in is not configured. Add VITE_GOOGLE_CLIENT_ID and connect an OAuth provider.');
+  };
+
   return (
     <dialog ref={dialogRef} className="auth-dialog" onCancel={handleCancel} aria-labelledby="form-title">
       <div className="login-overlay">
@@ -34,6 +40,7 @@ export default function AuthModal({
             isSignUp={isSignUp}
             onClose={onClose}
             onAuth={onAuth}
+            onGoogleSignIn={handleGoogleSignIn}
           />
         </div>
       </div>

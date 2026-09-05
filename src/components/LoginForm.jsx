@@ -4,6 +4,7 @@ export default function LoginForm({
   isSignUp,
   onClose,
   onAuth,
+  onGoogleSignIn,
 }) {
   const firstInputRef = useRef(null);
   const [username, setUsername] = useState('');
@@ -61,7 +62,7 @@ export default function LoginForm({
             {!isSignUp && <a href="#forgot" className="forgot-pass-link">Forgot password?</a>}
           </div>
           <div className="divider-or">or</div>
-          <button type="button" className="google-btn" onClick={() => setErrorMessage('Google sign-in is not connected in this demo.')}>
+          <button type="button" className="google-btn" onClick={onGoogleSignIn}>
             <span className="social-letter google-letter" aria-hidden="true">G</span>
             Sign in with Google
           </button>
