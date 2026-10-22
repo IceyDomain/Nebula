@@ -125,9 +125,9 @@ export default function LandingPage({ onOpenModal, onEnter = onOpenModal }) {
       <footer id="support" className="lp-footer">
         <span>© {new Date().getFullYear()} Nebula</span>
         <span className="lp-footer-links">
-          <a href="#">Terms</a>
-          <a href="#">Privacy</a>
-          <a href="#">Support</a>
+          <a href="/terms.html">Terms of Service</a>
+          <a href="/privacy.html">Privacy Policy</a>
+          <a href="mailto:theicedomain123@gmail.com">Support</a>
         </span>
       </footer>
     </div>

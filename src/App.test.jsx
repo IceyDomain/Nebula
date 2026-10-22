@@ -7,6 +7,8 @@ test('renders the Nebula landing page', () => {
   render(<App />);
   expect(screen.getByRole('heading', { name: 'The secure portal for your school.' })).toBeDefined();
   expect(screen.getByRole('button', { name: /enter portal/i })).toBeDefined();
+  expect(screen.getByRole('link', { name: 'Terms of Service' }).getAttribute('href')).toBe('/terms.html');
+  expect(screen.getByRole('link', { name: 'Privacy Policy' }).getAttribute('href')).toBe('/privacy.html');
 });
 
 test('routes landing page entry actions to the sign-in choice screen', () => {
@@ -24,6 +26,8 @@ test('opens the sign-in choice from the landing page and returns home', () => {
 
   fireEvent.click(screen.getByRole('button', { name: /enter portal/i }));
   expect(screen.getByRole('heading', { name: 'How are you signing in?' })).toBeDefined();
+  expect(screen.getByRole('link', { name: 'Terms of Service' }).getAttribute('href')).toBe('/terms.html');
+  expect(screen.getByRole('link', { name: 'Privacy Policy' }).getAttribute('href')).toBe('/privacy.html');
 
   fireEvent.click(screen.getByRole('button', { name: /back to home/i }));
   expect(screen.getByRole('heading', { name: 'The secure portal for your school.' })).toBeDefined();
