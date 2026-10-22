@@ -1,5 +1,6 @@
 // Ardenne High School version of the Community forum. It starts empty: no sample topics and no categories.
 import { useMemo, useState } from 'react';
+import CommunityDocument from './CommunityDocument';
 import { calculatePublishingFee } from '../utils/publishingRates';
 import useCommunityForum from '../utils/useCommunityForum';
 
@@ -109,7 +110,7 @@ export default function ArdenneCommunity({ user, currentUser, onPublishTransacti
             <h2 style={{ margin: 0, font: '800 24px var(--head)' }}>{selectedTopic.title}</h2>
             <div style={{ marginTop: 8 }}><span className="nd-cat">{selectedTopic.category}</span><small style={{ color: 'var(--muted)' }}>Posted by @{selectedTopic.author}</small></div>
           </div>
-          <p style={{ color: 'var(--text)', fontSize: 16 }}>{selectedTopic.content}</p>
+          <CommunityDocument topic={selectedTopic} />
           {selectedTopic.poll && (
             <div className="nd-card nd-poll">
               <h3>Poll: {selectedTopic.poll.question}</h3>
@@ -175,7 +176,7 @@ export default function ArdenneCommunity({ user, currentUser, onPublishTransacti
                 </div>
               ) : displayedTopics.map((topic) => (
                 <button type="button" className="nd-row" key={topic.id} onClick={() => openTopic(topic)}>
-                  <div><h4>{topic.title}</h4><span className="nd-cat">{topic.category}</span><small>@{topic.author}</small></div>
+                  <div><h4>{topic.title}</h4><span className="nd-cat">{topic.documentHtml ? 'Shared document' : topic.category}</span><small>@{topic.author}</small></div>
                   <span><span className="nd-avatar-s">{topic.author.charAt(0).toUpperCase()}</span></span>
                   <span>{topic.repliesCount}</span><span>{topic.views}</span><span>{topic.lastActivity}</span>
                 </button>
@@ -199,7 +200,7 @@ export default function ArdenneCommunity({ user, currentUser, onPublishTransacti
               )}
               <textarea className="nd-inp" rows="6" placeholder="Type your post..." value={content} onChange={(event) => setContent(event.target.value)} required />
               <div className="nd-modal-actions" style={{ justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 14, color: '#a8a3bd' }}>Cost: <strong style={{ color: '#f2f0fa' }}>{fee.finalCost} Credits</strong> (+{fee.earnedExp} EXP)</span>
+                <span style={{ fontSize: 14, color: '#a8a3bd' }}>{fee.characterCount} letters/digits · {fee.baseUnits} × 2,000 · <strong style={{ color: '#f2f0fa' }}>{fee.finalCost} Credits</strong> (+{fee.earnedExp} EXP)</span>
                 <span style={{ display: 'flex', gap: 10 }}>
                   <button type="button" className="nd-btn ghost" onClick={() => setShowNewTopicModal(false)}>Cancel</button>
                   <button type="submit" className="nd-btn" disabled={status !== 'connected'}>Post Topic</button>

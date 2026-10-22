@@ -251,7 +251,7 @@ export default function DocEditorCore({ variant = 'nebula', docId, title, initia
         <input ref={titleRef} className="de-title" aria-label="Document title" value={title} onChange={(e) => onTitleChange(e.target.value)} />
         <div className="de-meta">
           <span>{saved}</span>
-          <span>{counts.words} words ({fee.finalCost} Credits, +{fee.earnedExp} EXP)</span>
+          <span>{fee.characterCount} letters/digits · {fee.baseUnits} x 2,000 ({fee.finalCost} Credits, +{fee.earnedExp} EXP)</span>
           <button type="button" className="de-btn" onClick={onPublish}>Share / Publish</button>
         </div>
       </div>

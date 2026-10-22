@@ -31,6 +31,18 @@ describe('store discounts', () => {
     expect(calculatePublishingFee('A short note').earnedExp).toBe(20);
   });
 
+  test('charges 10 credits for each started 2,000 letters or digits', () => {
+    expect(calculatePublishingFee('a'.repeat(2000)).finalCost).toBe(10);
+    expect(calculatePublishingFee('a'.repeat(2001)).finalCost).toBe(20);
+    expect(calculatePublishingFee('a'.repeat(4000)).finalCost).toBe(20);
+    expect(calculatePublishingFee('a'.repeat(4001)).finalCost).toBe(30);
+  });
+
+  test('does not charge for whitespace or punctuation that contains no letters or digits', () => {
+    expect(calculatePublishingFee(' !?\n ').characterCount).toBe(0);
+    expect(calculatePublishingFee(' !?\n ').finalCost).toBe(0);
+  });
+
   test('tier purchases raise EXP to at least the tier level', () => {
     const alert = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
     const purchase = handleTierPurchase({

@@ -53,11 +53,27 @@ The dashboard profile menu links to profile settings, where users can equip purc
 
 Profile data, purchases, documents, and schedules use browser `localStorage` and are not synced across devices. Community topics and replies use the Cloudflare D1 API: personal accounts share one forum and each configured organization has its own forum. The current browser-only sign-in is not verified by the API, and organization membership is not enforced server-side; treat names and forum contents as public and unverified.
 
+Publishing costs 10 credits per started block of 2,000 letters and digits in the content (spaces and punctuation are not counted), before tier discounts. Publishing a document sends its plain text and formatted document HTML to the matching community forum; document HTML is sanitized before it is rendered.
+
 ## Site phase
 
 The current phase is set in `src/sitePhase.js`. `testing` adds 1,000 credits to each locally stored account once per UTC day. Change it to `demo` to stop the daily credits and clear saved account lists the next time each browser loads the site after the phase switch. Demo mode does not add the built-in sample accounts.
 
 Accounts are browser-local, so a phase switch cannot remotely clear accounts in other browsers or devices. This reset only removes account/session records; it does not clear other saved local data or server-side community posts.
+
+## Unexpected application error codes
+
+The app-wide error screen shows a stable code that users can share with support:
+
+| Code | Meaning |
+| --- | --- |
+| `NEB-PAGE-001` | The For Schools page is currently unavailable. |
+| `NEB-UI-001` | A page failed while rendering. |
+| `NEB-JS-001` | An uncaught browser JavaScript error occurred. |
+| `NEB-ASYNC-001` | A promise rejection was not handled. |
+| `NEB-UNKNOWN-001` | Fallback code for an unclassified unexpected error. |
+
+The catalog is maintained in `src/utils/errorCodes.js`. Expected form, network, and API failures continue to use their existing inline messages.
 
 ## Shared community database
 
@@ -67,13 +83,17 @@ The community API is served by the Cloudflare Worker configured in `wrangler.jso
 npx wrangler d1 create nebula-community
 ```
 
-Run `npm run dev:cloudflare` to build the site and start the Worker with a local D1 database. Local migrations are in `migrations/`. For deployment, authenticate Wrangler with the Cloudflare account that owns the site and run:
+Run `npm run dev:cloudflare` to build the site and start the Worker with a local D1 database. Local migrations are in `migrations/`. For a one-time automatic deployment setup, add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository Actions secrets. The token must be allowed to deploy Workers and manage D1 migrations for this account. After that, pushes to `main` run tests and deploy the Worker and assets automatically; the workflow can also be started manually from the Actions tab.
+
+To deploy manually, authenticate Wrangler with the Cloudflare account that owns the site and run:
 
 ```sh
 npm run deploy
 ```
 
 The deploy script applies D1 migrations remotely before deploying the Worker and static assets. Community data is not shared until the Worker is deployed with a real D1 database ID. The API currently accepts browser-supplied poster names and organization scopes because account authentication is client-side only; it does not verify identities or school membership. Do not treat those names as verified identities or post private information.
+
+Community documents require migration `0002_document_html.sql`, which adds the `document_html` column. The regular deploy command and automatic deployment workflow apply it before deploying the Worker.
 
 If the forum reports that its API returned HTML or a non-JSON response, the host is serving the single-page app fallback for `/api/community/...` instead of forwarding that path to the Worker. Deploy the site and Worker together with `npm run deploy`, and make sure the public site domain points to that Worker deployment. A static-only hosting deployment will not provide the community API.
 

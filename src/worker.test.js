@@ -24,8 +24,8 @@ function createDatabase() {
             },
             async run() {
               if (query.includes('INSERT INTO community_topics')) {
-                const [id, scope, title, content, category, author, tier, created_at, credit_cost, earned_exp] = values;
-                topics.push({ id, scope, title, content, category, author, tier, created_at, credit_cost, earned_exp, views: 1, replies_count: 0 });
+                const [id, scope, title, content, category, author, tier, created_at, credit_cost, earned_exp, document_html] = values;
+                topics.push({ id, scope, title, content, category, author, tier, created_at, credit_cost, earned_exp, document_html, views: 1, replies_count: 0 });
               } else if (query.includes('INSERT INTO community_replies')) {
                 const [id, topic_id, author, tier, text, created_at] = values;
                 replies.push({ id, topic_id, author, tier, text, created_at, likes: 0 });
@@ -86,6 +86,32 @@ test('community topics and replies are shared within their forum scope', async (
 
   const personalResponse = await worker.fetch(apiRequest('/api/community/topics?scope=personal'), env);
   expect(await personalResponse.json()).toEqual([]);
+});
+
+test('community stores and returns published document HTML', async () => {
+  const env = { COMMUNITY_DB: createDatabase(), ASSETS: { fetch: () => new Response('asset') } };
+  const documentHtml = '<h1>My document</h1><p><strong>Formatted content</strong></p>';
+  const createdResponse = await worker.fetch(
+    apiRequest('/api/community/topics?scope=personal', 'POST', {
+      title: 'My document',
+      content: 'Formatted content',
+      documentHtml,
+      category: 'General Discussion',
+      author: 'student-one',
+      tier: 'Basic',
+      creditCost: 10,
+      earnedExp: 20,
+    }),
+    env,
+  );
+
+  expect(createdResponse.status).toBe(201);
+  expect((await createdResponse.json()).documentHtml).toBe(documentHtml);
+
+  const topicsResponse = await worker.fetch(apiRequest('/api/community/topics?scope=personal'), env);
+  const [topic] = await topicsResponse.json();
+  expect(topic.content).toBe('Formatted content');
+  expect(topic.documentHtml).toBe(documentHtml);
 });
 
 test('community API rejects invalid scopes and invalid topics', async () => {

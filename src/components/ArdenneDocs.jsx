@@ -1,5 +1,6 @@
 // Ardenne High School version of the Notes & Docs page.
 import { useEffect, useState } from 'react';
+import { publishDocumentToCommunity } from '../utils/communityDocuments';
 import { calculatePublishingFee } from '../utils/publishingRates';
 import ArdenneDocEditor from './ArdenneDocEditor';
 import { htmlToText, PREMIUM_TEMPLATE_CONTENT, templateHtml, textToHtml } from './DocEditorCore';
@@ -26,7 +27,6 @@ export default function ArdenneDocs({ credits, user, onPublish, onUpdateCredits,
   const [docText, setDocText] = useState('');
   const [docHtml, setDocHtml] = useState('');
   const [query, setQuery] = useState('');
-  const wordCount = docText.trim() ? docText.trim().split(/\s+/).length : 0;
   const publishingFee = calculatePublishingFee(docText, user?.tier);
   const currentExp = user?.exp || 0;
   const availableTemplates = [
@@ -76,12 +76,26 @@ export default function ArdenneDocs({ credits, user, onPublish, onUpdateCredits,
     saveDocuments(userDocs.map((document) => document.id === activeDocId ? { ...document, title: title || 'Untitled Document' } : document));
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!docText.trim()) return alert('Cannot publish an empty document.');
     if (credits < publishingFee.finalCost) return alert(`Not enough credits. You need ${publishingFee.finalCost} credits.`);
-    onUpdateCredits(credits - publishingFee.finalCost, currentExp + publishingFee.earnedExp);
-    onPublish({ id: Date.now(), title: docTitle || 'Untitled Document', text: docText, words: wordCount, creditCost: publishingFee.finalCost, earnedExp: publishingFee.earnedExp, date: new Date().toLocaleDateString() });
-    alert('Published to the Community forum.');
+    const document = {
+      id: Date.now(),
+      title: docTitle || 'Untitled Document',
+      text: docText,
+      html: docHtml || textToHtml(docText),
+      creditCost: publishingFee.finalCost,
+      earnedExp: publishingFee.earnedExp,
+      date: new Date().toLocaleDateString(),
+    };
+    try {
+      await publishDocumentToCommunity({ document, fee: publishingFee, user, theme });
+      onUpdateCredits(credits - publishingFee.finalCost, currentExp + publishingFee.earnedExp);
+      onPublish(document);
+      alert('Published to the Community forum.');
+    } catch (error) {
+      alert(`Unable to publish this document to the Community forum. ${error.message}`);
+    }
   };
 
   if (activeDocId !== null) {

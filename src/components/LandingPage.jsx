@@ -52,7 +52,7 @@ export default function LandingPage({ onOpenModal, onEnter = onOpenModal }) {
         </div>
         <nav className="lp-nav">
           <a href="#features">Features</a>
-          <a href="#schools">For schools</a>
+          <a href="/for-schools.html">For schools</a>
           <a href="#support">Support</a>
           <button type="button" className="lp-btn lp-btn-outline lp-btn-sm" onClick={onEnter}>
             Sign in
@@ -72,7 +72,7 @@ export default function LandingPage({ onOpenModal, onEnter = onOpenModal }) {
             <button type="button" className="lp-btn lp-btn-primary" onClick={onEnter}>
               Enter Portal
             </button>
-            <a className="lp-btn lp-btn-outline" href="#schools">
+            <a className="lp-btn lp-btn-outline" href="/for-schools.html">
               For schools
             </a>
           </div>
@@ -107,18 +107,6 @@ export default function LandingPage({ onOpenModal, onEnter = onOpenModal }) {
               <p>{f.text}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      <section id="schools" className="lp-section">
-        <div className="lp-band">
-          <div>
-            <h2>Bring Nebula to your school</h2>
-            <p>Each organization gets its own branded sign-in and space.</p>
-          </div>
-          <button type="button" className="lp-btn lp-btn-light">
-            Request access
-          </button>
         </div>
       </section>
 

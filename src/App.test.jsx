@@ -7,6 +7,7 @@ test('renders the Nebula landing page', () => {
   render(<App />);
   expect(screen.getByRole('heading', { name: 'The secure portal for your school.' })).toBeDefined();
   expect(screen.getByRole('button', { name: /enter portal/i })).toBeDefined();
+  expect(screen.getAllByRole('link', { name: 'For schools' }).every((link) => link.getAttribute('href') === '/for-schools.html')).toBe(true);
   expect(screen.getByRole('link', { name: 'Terms of Service' }).getAttribute('href')).toBe('/terms.html');
   expect(screen.getByRole('link', { name: 'Privacy Policy' }).getAttribute('href')).toBe('/privacy.html');
 });

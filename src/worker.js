@@ -7,6 +7,8 @@ const PERSONAL_CATEGORIES = new Set([
 const ORGANIZATION_CATEGORIES = new Set(['General Discussion']);
 const MAX_TITLE_LENGTH = 120;
 const MAX_CONTENT_LENGTH = 5000;
+const MAX_DOCUMENT_LENGTH = 100000;
+const MAX_DOCUMENT_HTML_LENGTH = 200000;
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -41,6 +43,7 @@ function topicFromRow(row, replies) {
     lastActivity: row.replies_count ? 'Recently' : 'Just now',
     createdAt: row.created_at,
     content: row.content,
+    documentHtml: row.document_html,
     creditCost: row.credit_cost,
     earnedExp: row.earned_exp,
     replies: replies.get(row.id) || [],
@@ -49,7 +52,7 @@ function topicFromRow(row, replies) {
 
 async function listTopics(db, scope) {
   const { results: rows } = await db.prepare(
-    `SELECT id, title, category, author, tier, content, created_at,
+    `SELECT id, title, category, author, tier, content, document_html, created_at,
             credit_cost, earned_exp, views, replies_count
      FROM community_topics
      WHERE scope = ?
@@ -86,13 +89,18 @@ async function listTopics(db, scope) {
 
 async function createTopic(db, scope, body) {
   const title = requiredText(body?.title, MAX_TITLE_LENGTH);
-  const content = requiredText(body?.content, MAX_CONTENT_LENGTH);
+  const isDocument = typeof body?.documentHtml === 'string' && body.documentHtml.trim().length > 0;
+  const contentLimit = isDocument ? MAX_DOCUMENT_LENGTH : MAX_CONTENT_LENGTH;
+  const content = requiredText(body?.content, contentLimit);
+  const documentHtml = isDocument && body.documentHtml.length <= MAX_DOCUMENT_HTML_LENGTH
+    ? body.documentHtml
+    : null;
   const author = requiredText(body?.author, 40);
   const tier = requiredText(body?.tier, 20) || 'Basic';
   const category = requiredText(body?.category, 60);
   const categories = scope === 'personal' ? PERSONAL_CATEGORIES : ORGANIZATION_CATEGORIES;
 
-  if (!title || !content || !author || !category || !categories.has(category)) {
+  if (!title || !content || !author || !category || !categories.has(category) || (isDocument && !documentHtml)) {
     return jsonResponse({ error: 'Enter a valid title, message, author, and category.' }, 400);
   }
 
@@ -104,14 +112,15 @@ async function createTopic(db, scope, body) {
     author,
     tier,
     createdAt: Date.now(),
+    documentHtml,
     creditCost: Number.isFinite(body.creditCost) ? Math.max(0, Math.floor(body.creditCost)) : 0,
     earnedExp: Number.isFinite(body.earnedExp) ? Math.max(0, Math.floor(body.earnedExp)) : 0,
   };
 
   await db.prepare(
     `INSERT INTO community_topics
-       (id, scope, title, content, category, author, tier, created_at, credit_cost, earned_exp)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, scope, title, content, category, author, tier, created_at, credit_cost, earned_exp, document_html)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).bind(
     topic.id,
     scope,
@@ -123,6 +132,7 @@ async function createTopic(db, scope, body) {
     topic.createdAt,
     topic.creditCost,
     topic.earnedExp,
+    topic.documentHtml,
   ).run();
 
   return jsonResponse({
