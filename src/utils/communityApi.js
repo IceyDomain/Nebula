@@ -6,13 +6,23 @@ async function request(path, options) {
       ...options?.headers,
     },
   });
-  const result = await response.json().catch(() => null);
+  const contentType = response.headers?.get('content-type') || '';
+  if (contentType && !contentType.toLowerCase().includes('application/json')) {
+    throw new Error(
+      `The community API returned ${contentType || 'a non-JSON response'} (${response.status}). `
+      + 'The site host is serving its static page instead of the community Worker. Deploy the Worker and site together with "npm run deploy".',
+    );
+  }
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error('The community API returned invalid JSON. Please retry or contact the site administrator.');
+  }
 
   if (!response.ok) {
     throw new Error(result?.error || `Community request failed (${response.status}).`);
-  }
-  if (result === null) {
-    throw new Error('The community API returned an invalid response. Please try again later.');
   }
   return result;
 }

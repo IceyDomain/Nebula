@@ -75,6 +75,8 @@ npm run deploy
 
 The deploy script applies D1 migrations remotely before deploying the Worker and static assets. Community data is not shared until the Worker is deployed with a real D1 database ID. The API currently accepts browser-supplied poster names and organization scopes because account authentication is client-side only; it does not verify identities or school membership. Do not treat those names as verified identities or post private information.
 
+If the forum reports that its API returned HTML or a non-JSON response, the host is serving the single-page app fallback for `/api/community/...` instead of forwarding that path to the Worker. Deploy the site and Worker together with `npm run deploy`, and make sure the public site domain points to that Worker deployment. A static-only hosting deployment will not provide the community API.
+
 ## Remaining integrations
 
 - Connect school announcements and activity feeds to a shared backend.
