@@ -74,7 +74,7 @@ function persistUsers(namespace, users) {
 }
 
 function clearLegacySharedState() {
-  const legacyKeys = [STORAGE_KEYS.legacyUsers, 'nebula_active_user', 'nebula_active_org_user'];
+  const legacyKeys = [STORAGE_KEYS.legacyUsers];
   legacyKeys.forEach((key) => localStorage.removeItem(key));
 }
 

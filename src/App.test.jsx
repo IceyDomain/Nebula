@@ -11,6 +11,29 @@ test('renders the Nebula landing page', () => {
   expect(screen.getByRole('link', { name: 'Privacy Policy' }).getAttribute('href')).toBe('/privacy.html');
 });
 
+test('restores an existing session without deleting it during startup', async () => {
+  localStorage.clear();
+  const user = {
+    username: 'returning-user',
+    email: 'returning@example.com',
+    role: 'user',
+    credits: 1000,
+    tier: 'Basic',
+  };
+  localStorage.setItem('nebula_active_user', JSON.stringify(user));
+
+  const firstLoad = render(<App />);
+  await waitFor(() => expect(screen.getByText(/Welcome back,/)).toBeDefined());
+  expect(JSON.parse(localStorage.getItem('nebula_active_user')).username).toBe('returning-user');
+
+  firstLoad.unmount();
+  const refreshedLoad = render(<App />);
+  await waitFor(() => expect(screen.getByText(/Welcome back,/)).toBeDefined());
+  expect(JSON.parse(localStorage.getItem('nebula_active_user')).username).toBe('returning-user');
+  refreshedLoad.unmount();
+  localStorage.clear();
+});
+
 test('routes landing page entry actions to the sign-in choice screen', () => {
   const onOpenModal = vi.fn();
   render(<LandingPage onOpenModal={onOpenModal} />);

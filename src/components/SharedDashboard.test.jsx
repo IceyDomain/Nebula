@@ -52,3 +52,20 @@ test('reports a shared forum outage and disables posting', async () => {
   unmount();
   vi.unstubAllGlobals();
 });
+
+test('reports a static-site fallback instead of treating HTML as a topic list', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    json: async () => ({ title: 'Nebula Portal' }),
+  }));
+  const { unmount } = render(
+    <SharedDashboard user={{ username: 'student-one', credits: 1000, tier: 'Basic' }} />,
+  );
+
+  expect((await screen.findByRole('alert')).textContent).toContain('did not return a topic list');
+  expect(screen.getByRole('button', { name: '+ New Topic' }).disabled).toBe(true);
+
+  unmount();
+  vi.unstubAllGlobals();
+});
