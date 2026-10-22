@@ -14,5 +14,5 @@ test('unlocked store templates appear in Docs and create a prefilled document', 
   );
 
   fireEvent.click(screen.getByRole('button', { name: /Resume Pro/ }));
-  expect(screen.getByRole('textbox', { name: 'Document editor' }).value).toContain('PROFESSIONAL SUMMARY');
+  expect(screen.getByRole('textbox', { name: 'Document editor' }).textContent).toContain('PROFESSIONAL SUMMARY');
 });
