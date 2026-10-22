@@ -67,6 +67,7 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
   const forumStorageKey = isSchool ? `nebula_forum_topics_ardenne_${username}` : `nebula_forum_topics_${username}`;
   const [activeBg, setActiveBg] = useState(() => localStorage.getItem(profileBgKey) || defaultBg);
   const [purchasedBgs, setPurchasedBgs] = useState(() => {
+    if (Array.isArray(user.purchasedBgs)) return user.purchasedBgs;
     try {
       const saved = JSON.parse(localStorage.getItem(purchasedBgsKey) || 'null');
       return Array.isArray(saved) ? saved : defaultBgs;
@@ -90,13 +91,28 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
     setExp(newExp);
     if (profileUpdates.unlockedBorders) setUnlockedBorders(profileUpdates.unlockedBorders);
     if (profileUpdates.unlockedTemplates) setUnlockedTemplates(profileUpdates.unlockedTemplates);
+    if (profileUpdates.purchasedBgs) setPurchasedBgs(profileUpdates.purchasedBgs);
     if (profileUpdates.equippedBorder !== undefined) setEquippedBorder(profileUpdates.equippedBorder);
-    const updatedUser = { ...user, ...profileUpdates, credits: newCredits, tier: newTier, exp: newExp };
+    const updatedUser = {
+      ...user,
+      unlockedBorders,
+      unlockedTemplates,
+      purchasedBgs,
+      equippedBorder,
+      ...profileUpdates,
+      credits: newCredits,
+      tier: newTier,
+      exp: newExp,
+    };
     const userStoreKey = isSchool ? 'nebula_users_org' : 'nebula_users_personal';
     const activeUserKey = isSchool ? 'nebula_active_org_user' : 'nebula_active_user';
     localStorage.setItem(activeUserKey, JSON.stringify(updatedUser));
     const users = JSON.parse(localStorage.getItem(userStoreKey) || '[]');
-    localStorage.setItem(userStoreKey, JSON.stringify(users.map((storedUser) => storedUser.username === user.username ? updatedUser : storedUser)));
+    const matchingUser = (storedUser) => storedUser.username === user.username;
+    const storedUsers = users.some(matchingUser)
+      ? users.map((storedUser) => matchingUser(storedUser) ? updatedUser : storedUser)
+      : [...users, updatedUser];
+    localStorage.setItem(userStoreKey, JSON.stringify(storedUsers));
   };
 
   const handlePublish = (newNote) => {
@@ -131,12 +147,12 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
   };
 
   const purchaseBackground = (background, cost) => {
+    if (purchasedBgs.includes(background)) return false;
     const updatedUser = handleStorePurchase({ user: { ...user, credits, tier, exp }, itemPrice: cost, activeTier: tier });
     if (!updatedUser) return false;
     const updatedBackgrounds = [...purchasedBgs, background];
-    setPurchasedBgs(updatedBackgrounds);
     localStorage.setItem(purchasedBgsKey, JSON.stringify(updatedBackgrounds));
-    updateUserData(updatedUser.credits, updatedUser.tier, updatedUser.exp);
+    updateUserData(updatedUser.credits, updatedUser.tier, updatedUser.exp, { purchasedBgs: updatedBackgrounds });
     selectBackground(background);
     return true;
   };
@@ -156,7 +172,7 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
       ? { backgroundImage: `url(${activeBg.replace(/^url\(['"]?|['"]?\)$/g, '')})`, backgroundSize: 'cover', backgroundPosition: 'center' }
       : { backgroundColor: activeBg };
 
-  const fullUser = { ...user, username, credits, tier, exp, unlockedBorders, unlockedTemplates, equippedBorder };
+  const fullUser = { ...user, username, credits, tier, exp, purchasedBgs, unlockedBorders, unlockedTemplates, equippedBorder };
   const classes = ['nd', isLightColor(activeBg) ? 'nd-light' : '', isEditingDoc ? 'nd-editing' : ''].filter(Boolean).join(' ');
 
   return (
