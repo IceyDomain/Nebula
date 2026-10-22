@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './nebula-dashboard.css';
 import NebulaDocs from './NebulaDocs';
 import NebulaStore from './NebulaStore';
@@ -9,7 +9,7 @@ import LevelProgressBar from './LevelProgressBar';
 import UserAvatar from './UserAvatar';
 import GameRoomView from './GameRoomView';
 import { NebulaBrand, ArdenneBrand } from './Brand';
-import { TIER_PERKS, calculateProgress, handleStorePurchase } from '../utils/tierSystem';
+import { TIER_PERKS, calculateProgress, handleStorePurchase, handleTierPurchase } from '../utils/tierSystem';
 
 const ARDENNE_ID = 'ardenne-high-school';
 
@@ -84,6 +84,12 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
   });
   const prefix = isSchool ? 'ardenne' : 'nebula';
 
+  useEffect(() => {
+    setCredits(user.credits ?? 1000);
+    setTier(user.tier || 'Basic');
+    setExp(user.exp ?? 0);
+  }, [user.credits, user.tier, user.exp]);
+
   const updateUserData = (newCredits, newTier = tier, newExp = exp, profileUpdates = {}) => {
     setCredits(newCredits);
     setTier(newTier);
@@ -157,10 +163,9 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
   };
 
   const purchaseTier = (nextTier) => {
-    const tierPrice = TIER_PERKS[nextTier]?.price;
-    const updatedUser = handleStorePurchase({ user: { ...user, credits, tier, exp }, itemPrice: tierPrice, activeTier: tier });
+    const updatedUser = handleTierPurchase({ user: { ...user, credits, tier, exp }, nextTier });
     if (!updatedUser) return false;
-    updateUserData(updatedUser.credits, nextTier, updatedUser.exp);
+    updateUserData(updatedUser.credits, updatedUser.tier, updatedUser.exp);
     alert(`${nextTier} Tier unlocked.`);
     return true;
   };

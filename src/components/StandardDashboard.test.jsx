@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
 import StandardDashboard from './StandardDashboard';
+import { calculateProgress } from '../utils/tierSystem';
 
 test('profile menu opens the profile and unlocked frames can be equipped', () => {
   localStorage.clear();
@@ -31,6 +32,7 @@ test('profile menu opens the profile and unlocked frames can be equipped', () =>
 
 test('saves purchased backgrounds on the signed-in account', () => {
   localStorage.clear();
+  const alert = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
   const user = { username: 'store-test', email: 'store@example.com', role: 'user', credits: 1000, tier: 'Basic', exp: 0 };
   localStorage.setItem('nebula_users_personal', JSON.stringify([user]));
   const { unmount } = render(<StandardDashboard user={user} onSignOut={() => {}} />);
@@ -53,4 +55,25 @@ test('saves purchased backgrounds on the signed-in account', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Visit Store' }));
   const restoredCard = screen.getByText('Deep Space Blue').closest('.nd-card');
   expect(within(restoredCard).getByRole('button', { name: 'Unlocked' })).toBeDefined();
+  alert.mockRestore();
+});
+
+test('tier upgrades persist the matching EXP level', () => {
+  localStorage.clear();
+  const alert = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
+  const user = { username: 'tier-test', email: 'tier@example.com', role: 'user', credits: 1000, tier: 'Basic', exp: 0 };
+  localStorage.setItem('nebula_users_personal', JSON.stringify([user]));
+  render(<StandardDashboard user={user} onSignOut={() => {}} />);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Open profile menu' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Profile' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Visit Store' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Upgrade' }));
+
+  const savedUser = JSON.parse(localStorage.getItem('nebula_users_personal'))
+    .find((account) => account.username === user.username);
+  expect(savedUser.tier).toBe('Bronze');
+  expect(calculateProgress(savedUser.exp).level).toBe(20);
+  expect(JSON.parse(localStorage.getItem('nebula_active_user')).tier).toBe('Bronze');
+  alert.mockRestore();
 });

@@ -1,3 +1,5 @@
+export const EXP_PER_CREDIT = 2;
+
 export const TIER_PERKS = {
   Basic: { level: 0, discount: 0, boost: 1, monthlyBonus: 100, milestoneReward: 0, buyable: true, price: 0 },
   Bronze: { level: 20, discount: 0.02, boost: 1, monthlyBonus: 200, milestoneReward: 250, buyable: true, price: 500 },
@@ -14,6 +16,14 @@ export const TIER_PERKS = {
 export function getExpForLevel(level) {
   if (level <= 1) return 0;
   return Math.floor(100 * Math.pow(1.05, level - 1));
+}
+
+export function getMinimumExpForLevel(level) {
+  let totalExp = 0;
+  for (let nextLevel = 2; nextLevel <= level; nextLevel += 1) {
+    totalExp += getExpForLevel(nextLevel);
+  }
+  return totalExp;
 }
 
 export function calculateProgress(totalExp = 0) {
@@ -62,7 +72,7 @@ export function handleStorePurchase({ user, itemPrice, activeTier = user.tier ||
   }
 
   const oldProgress = calculateProgress(user.exp || 0);
-  const newTotalExp = (user.exp || 0) + Math.floor(finalPrice * perks.boost);
+  const newTotalExp = (user.exp || 0) + Math.floor(finalPrice * perks.boost * EXP_PER_CREDIT);
   const newProgress = calculateProgress(newTotalExp);
   let newTier = user.tier || 'Basic';
   let newCredits = user.credits - finalPrice;
@@ -81,4 +91,27 @@ export function handleStorePurchase({ user, itemPrice, activeTier = user.tier ||
   }
 
   return { ...user, credits: newCredits, exp: newTotalExp, tier: newTier };
+}
+
+export function handleTierPurchase({ user, nextTier }) {
+  const perks = TIER_PERKS[nextTier];
+  const currentTierLevel = TIER_PERKS[user.tier || 'Basic']?.level || 0;
+  if (!perks?.buyable || perks.price <= 0 || perks.level <= currentTierLevel) return null;
+
+  const purchasedUser = handleStorePurchase({
+    user,
+    itemPrice: perks.price,
+    activeTier: user.tier || 'Basic',
+  });
+  if (!purchasedUser) return null;
+
+  const exp = Math.max(purchasedUser.exp, getMinimumExpForLevel(perks.level));
+  const earnedTier = getTierForLevel(calculateProgress(exp).level);
+  const earnedTierLevel = TIER_PERKS[earnedTier]?.level || 0;
+
+  return {
+    ...purchasedUser,
+    exp,
+    tier: earnedTierLevel > perks.level ? earnedTier : nextTier,
+  };
 }

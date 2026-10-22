@@ -7,7 +7,14 @@ import LandingPage from './components/LandingPage';
 import OwnerDashboard from './components/OwnerDashboard';
 import SignInChoice from './components/SignInChoice';
 import StandardDashboard from './components/StandardDashboard';
+import { SITE_PHASE } from './sitePhase';
 import { requestGoogleProfile } from './utils/googleAuth';
+import {
+  applyDailyCreditsToStorage,
+  getUtcDateString,
+  grantDailyTestingCredits,
+  initializeSitePhase,
+} from './utils/sitePhase';
 import './App.css';
 
 const STORAGE_KEYS = {
@@ -57,12 +64,15 @@ function readUsers(namespace = 'personal') {
         credits: user.credits ?? 1000,
       }));
 
-    const seedUsers = namespace === 'organization'
-      ? INITIAL_USERS.filter((user) => user.organization?.id === 'ardenne-high-school')
-      : INITIAL_USERS;
+    const seedUsers = SITE_PHASE === 'demo'
+      ? []
+      : namespace === 'organization'
+        ? INITIAL_USERS.filter((user) => user.organization?.id === 'ardenne-high-school')
+        : INITIAL_USERS;
     const existingEmails = new Set(normalizedUsers.map((user) => user.email));
     return [...seedUsers.filter((user) => !existingEmails.has(user.email)), ...normalizedUsers];
   } catch {
+    if (SITE_PHASE === 'demo') return [];
     return namespace === 'organization'
       ? INITIAL_USERS.filter((user) => user.organization?.id === 'ardenne-high-school')
       : [...INITIAL_USERS];
@@ -78,6 +88,10 @@ function clearLegacySharedState() {
   legacyKeys.forEach((key) => localStorage.removeItem(key));
 }
 
+function addTestingSignupCredits(user) {
+  return SITE_PHASE === 'testing' ? grantDailyTestingCredits(user) : user;
+}
+
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSignUp, setIsSignUp] = useState(true);
@@ -87,19 +101,41 @@ function App() {
 
   useEffect(() => {
     clearLegacySharedState();
+    let lastCreditDate = getUtcDateString();
     try {
-      persistUsers('personal', readUsers('personal'));
-      const savedPersonalSession = localStorage.getItem(STORAGE_KEYS.activeUser);
-      const savedOrgSession = localStorage.getItem(STORAGE_KEYS.activeOrganizationUser);
-      if (savedPersonalSession) {
-        setCurrentUser(JSON.parse(savedPersonalSession));
-      } else if (savedOrgSession) {
-        setCurrentUser(JSON.parse(savedOrgSession));
+      const { accountsReset } = initializeSitePhase(localStorage, SITE_PHASE);
+      if (!accountsReset) {
+        persistUsers('personal', readUsers('personal'));
+        persistUsers('organization', readUsers('organization'));
+        if (SITE_PHASE === 'testing') {
+          applyDailyCreditsToStorage(localStorage, lastCreditDate);
+        }
+        const savedPersonalSession = localStorage.getItem(STORAGE_KEYS.activeUser);
+        const savedOrgSession = localStorage.getItem(STORAGE_KEYS.activeOrganizationUser);
+        if (savedPersonalSession) {
+          setCurrentUser(JSON.parse(savedPersonalSession));
+        } else if (savedOrgSession) {
+          setCurrentUser(JSON.parse(savedOrgSession));
+        }
       }
-    } catch {
+    } catch (error) {
+      console.error('Unable to initialize account data for the current site phase.', error);
       localStorage.removeItem(STORAGE_KEYS.activeUser);
       localStorage.removeItem(STORAGE_KEYS.activeOrganizationUser);
     }
+
+    if (SITE_PHASE !== 'testing') return undefined;
+    const dailyCreditTimer = window.setInterval(() => {
+      const today = getUtcDateString();
+      if (today === lastCreditDate) return;
+      lastCreditDate = today;
+      applyDailyCreditsToStorage(localStorage, today);
+      const activeUser = localStorage.getItem(STORAGE_KEYS.activeUser)
+        || localStorage.getItem(STORAGE_KEYS.activeOrganizationUser);
+      setCurrentUser(activeUser ? JSON.parse(activeUser) : null);
+    }, 60_000);
+
+    return () => window.clearInterval(dailyCreditTimer);
   }, []);
 
   const handleAuthSubmit = ({ username, email, password }) => {
@@ -117,7 +153,9 @@ function App() {
         setIsSignUp(false);
         return;
       }
-      const newUser = normalizeUser({ username: normalizedUsername, email: normalizedEmail, password, role: 'user', credits: 1000 });
+      const newUser = normalizeUser(addTestingSignupCredits(
+        { username: normalizedUsername, email: normalizedEmail, password, role: 'user', credits: 1000 },
+      ));
       const nextUsers = [...users, newUser];
       persistUsers('personal', nextUsers);
       localStorage.setItem(STORAGE_KEYS.activeUser, JSON.stringify(newUser));
@@ -165,13 +203,13 @@ function App() {
             collision += 1;
           }
         }
-        googleUser = normalizeUser({
+        googleUser = normalizeUser(addTestingSignupCredits({
           username,
           email: normalizedEmail,
           googleId,
           role: 'user',
           credits: 1000,
-        });
+        }));
         updatedUsers = [...users, googleUser];
       }
       persistUsers('personal', updatedUsers);
@@ -226,14 +264,14 @@ function App() {
       throw new Error('Username or email already taken. Please sign in.');
     }
 
-    const newUser = normalizeUser({
+    const newUser = normalizeUser(addTestingSignupCredits({
       username: normalizedUsername,
       email: normalizedEmail,
       password,
       organization: org,
       role: 'user',
       credits: 1000,
-    });
+    }));
     const nextUsers = [...users, newUser];
     persistUsers('organization', nextUsers);
     localStorage.setItem(STORAGE_KEYS.activeUser, JSON.stringify(newUser));
@@ -266,7 +304,7 @@ function App() {
             collision += 1;
           }
         }
-        orgUser = normalizeUser({ username, email: normalizedEmail, googleId: profile.googleId, role: 'user', credits: 1000, organization: { name: 'Ardenne High School', id: 'ardenne-high-school' } });
+        orgUser = normalizeUser(addTestingSignupCredits({ username, email: normalizedEmail, googleId: profile.googleId, role: 'user', credits: 1000, organization: { name: 'Ardenne High School', id: 'ardenne-high-school' } }));
         updatedUsers = [...users, orgUser];
       }
       persistUsers('organization', updatedUsers);

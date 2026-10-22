@@ -53,6 +53,12 @@ The dashboard profile menu links to profile settings, where users can equip purc
 
 Profile data, purchases, documents, and schedules use browser `localStorage` and are not synced across devices. Community topics and replies use the Cloudflare D1 API: personal accounts share one forum and each configured organization has its own forum. The current browser-only sign-in is not verified by the API, and organization membership is not enforced server-side; treat names and forum contents as public and unverified.
 
+## Site phase
+
+The current phase is set in `src/sitePhase.js`. `testing` adds 1,000 credits to each locally stored account once per UTC day. Change it to `demo` to stop the daily credits and clear saved account lists the next time each browser loads the site after the phase switch. Demo mode does not add the built-in sample accounts.
+
+Accounts are browser-local, so a phase switch cannot remotely clear accounts in other browsers or devices. This reset only removes account/session records; it does not clear other saved local data or server-side community posts.
+
 ## Shared community database
 
 The community API is served by the Cloudflare Worker configured in `wrangler.jsonc`. Before local or production use, create a D1 database and replace the placeholder `database_id` in that file with the UUID returned by Cloudflare:

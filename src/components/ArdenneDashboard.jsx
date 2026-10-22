@@ -1,6 +1,6 @@
 // Ardenne High School version of the dashboard (no Game Room, blue and gold theme).
 // Use this instead of StandardDashboard for Ardenne students:  <ArdenneDashboard user={user} onSignOut={...} />
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './nebula-dashboard.css';
 import ArdenneDocs from './ArdenneDocs';
 import ArdenneStore from './ArdenneStore';
@@ -10,7 +10,7 @@ import ArdenneSettings from './ArdenneSettings';
 import LevelProgressBar from './LevelProgressBar';
 import UserAvatar from './UserAvatar';
 import { ArdenneBrand } from './ArdenneBrand';
-import { TIER_PERKS, calculateProgress, handleStorePurchase } from '../utils/tierSystem';
+import { TIER_PERKS, calculateProgress, handleStorePurchase, handleTierPurchase } from '../utils/tierSystem';
 
 const ICONS = {
   dashboard: <><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></>,
@@ -80,6 +80,12 @@ export default function ArdenneDashboard({ user, onSignOut }) {
     }
   });
   const prefix = 'ardenne';
+
+  useEffect(() => {
+    setCredits(user.credits ?? 1000);
+    setTier(user.tier || 'Basic');
+    setExp(user.exp ?? 0);
+  }, [user.credits, user.tier, user.exp]);
 
   const updateUserData = (newCredits, newTier = tier, newExp = exp, profileUpdates = {}) => {
     setCredits(newCredits);
@@ -154,10 +160,9 @@ export default function ArdenneDashboard({ user, onSignOut }) {
   };
 
   const purchaseTier = (nextTier) => {
-    const tierPrice = TIER_PERKS[nextTier]?.price;
-    const updatedUser = handleStorePurchase({ user: { ...user, credits, tier, exp }, itemPrice: tierPrice, activeTier: tier });
+    const updatedUser = handleTierPurchase({ user: { ...user, credits, tier, exp }, nextTier });
     if (!updatedUser) return false;
-    updateUserData(updatedUser.credits, nextTier, updatedUser.exp);
+    updateUserData(updatedUser.credits, updatedUser.tier, updatedUser.exp);
     alert(`${nextTier} Tier unlocked.`);
     return true;
   };

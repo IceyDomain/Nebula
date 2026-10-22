@@ -1,4 +1,4 @@
-import { TIER_PERKS } from './tierSystem.js';
+import { EXP_PER_CREDIT, TIER_PERKS } from './tierSystem.js';
 
 export function calculatePublishingFee(content = '', userTier = 'Basic') {
   const words = content.trim() ? content.trim().split(/\s+/).length : 0;
@@ -11,7 +11,7 @@ export function calculatePublishingFee(content = '', userTier = 'Basic') {
     wordCount: words,
     rawCost: rawCreditCost,
     finalCost: finalCreditCost,
-    earnedExp: Math.floor(finalCreditCost * perks.boost),
+    earnedExp: Math.floor(finalCreditCost * perks.boost * EXP_PER_CREDIT),
     discountPercent: perks.discount * 100,
   };
 }
