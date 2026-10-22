@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import VisualPanel from './VisualPanel';
 import LoginForm from './LoginForm';
+import { requestGoogleProfile } from '../utils/googleAuth';
 
 export default function AuthModal({
   isOpen,
@@ -8,8 +9,11 @@ export default function AuthModal({
   isSignUp,
   setIsSignUp,
   onAuth,
+  onGoogleAuth,
 }) {
   const dialogRef = useRef(null);
+  const [googleError, setGoogleError] = useState('');
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -25,10 +29,24 @@ export default function AuthModal({
     event.preventDefault();
   };
 
-  const handleGoogleSignIn = () => {
-    alert(import.meta.env.VITE_GOOGLE_CLIENT_ID
-      ? 'Google OAuth needs a configured identity provider callback before sign-in can be enabled.'
-      : 'Google sign-in is not configured. Add VITE_GOOGLE_CLIENT_ID and connect an OAuth provider.');
+  const handleGoogleSignIn = async () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      setGoogleError('Google sign-in is not configured. Set VITE_GOOGLE_CLIENT_ID and restart the app.');
+      return;
+    }
+
+    setGoogleError('');
+    setIsGoogleLoading(true);
+    try {
+      const profile = await requestGoogleProfile(clientId);
+      onGoogleAuth(profile);
+      setGoogleError('');
+    } catch (error) {
+      setGoogleError(error.message);
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   return (
@@ -41,6 +59,8 @@ export default function AuthModal({
             onClose={onClose}
             onAuth={onAuth}
             onGoogleSignIn={handleGoogleSignIn}
+            googleError={googleError}
+            isGoogleLoading={isGoogleLoading}
           />
         </div>
       </div>

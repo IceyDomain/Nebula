@@ -17,10 +17,8 @@ button, input, select { font: inherit; }
 button { cursor: pointer; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-.animated-galaxy-bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(circle at 20% 40%, rgba(217, 70, 239, .25), transparent 50%), radial-gradient(circle at 80% 60%, rgba(56, 189, 248, .2), transparent 50%), url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=2000&auto=format&fit=crop') center/cover; filter: brightness(.85); animation: spacePan 20s ease-in-out infinite alternate; }
-@keyframes spacePan { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.05) translate(-1%, -1%); } }
 @keyframes bgPulse { from { transform: scale(1); } to { transform: scale(1.03); } }
-@media (prefers-reduced-motion: reduce) { .animated-galaxy-bg, .reference-card { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .reference-card { animation: none; } }
 
 .btn-nebula, .portal-entry-btn { background: linear-gradient(135deg, var(--nebula-purple), var(--nebula-magenta)); color: #fff; border: 0; border-radius: 20px; font-weight: 700; box-shadow: 0 0 20px rgba(124, 58, 237, .4); transition: transform .2s ease, box-shadow .2s ease; }
 .btn-nebula:hover, .btn-nebula:focus-visible, .portal-entry-btn:hover, .portal-entry-btn:focus-visible { transform: translateY(-2px); box-shadow: 0 0 28px rgba(217, 70, 239, .6); }

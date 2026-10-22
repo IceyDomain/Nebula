@@ -37,6 +37,29 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+## Google sign-in
+
+Create a Google OAuth 2.0 **Web application** client ID in Google Cloud Console and add the app's origin (for local development, `http://localhost:3000`) to its authorized JavaScript origins. Set the client ID in the environment before starting Vite:
+
+```sh
+VITE_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com npm run dev
+```
+
+Google sign-in creates or reuses a regular local Nebula account. This prototype stores its users and active session in browser `localStorage`; it does not have a backend to verify Google ID tokens. Do not use this client-only authentication flow to protect production data or privileged operations.
+
+## Profiles and store
+
+The dashboard profile menu links to profile settings, where users can equip purchased avatar frames. The store supports background purchases, membership upgrades, avatar frames, and document templates. Tier discounts are shown in store prices and applied to the charge. Purchased document templates are available in Notes & Docs.
+
+Profile data, purchases, documents, schedules, and community posts currently use browser `localStorage`. They are local to the browser and are not synced across devices or shared between users.
+
+## Remaining integrations
+
+- Connect community posts, school announcements, and activity feeds to a shared backend; forum data is currently local to each browser/account.
+- Integrate Google Classroom data; the current dashboard link only opens Classroom.
+- Add backend account storage and server-side Google credential verification before using this prototype with real user data.
+- The older `PersonalTimetable` component is not routed in the app; its desktop notification option is not available in the active timetable screen.
+
 ## Learn More
 
 You can learn more in the [Vite documentation](https://vitejs.dev/guide/).

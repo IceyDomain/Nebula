@@ -1,30 +1,17 @@
-const TIER_BORDER_CLASSES = {
-  Basic: 'border-basic',
-  Bronze: 'border-bronze-glow',
-  Copper: 'border-copper-spark',
-  Iron: 'border-iron-shield',
-  Silver: 'border-silver-shine',
-  Gold: 'border-gold-crown',
-  Diamond: 'border-diamond-shimmer',
-  Ruby: 'border-ruby-flare',
-  Platinum: 'border-platinum-halo',
-  Nebula: 'border-nebula-pulse',
-};
-
-const TIER_BADGES = { Gold: 'crown', Nebula: 'nebula', default: 'shield' };
+const TIER_RINGS = ['Basic', 'Bronze', 'Copper', 'Iron', 'Silver', 'Gold', 'Diamond', 'Ruby', 'Platinum', 'Nebula'];
+const TIER_BADGES = { Gold: 'C', Nebula: 'N' };
 
 export default function UserAvatar({ user, size = 'md' }) {
-  const tier = user?.tier || 'Basic';
+  const tier = TIER_RINGS.includes(user?.tier) ? user.tier : 'Basic';
+  const frame = user?.equippedBorder && user.equippedBorder !== 'none' ? user.equippedBorder : tier;
   const username = user?.username || 'User';
-  const borderClass = TIER_BORDER_CLASSES[tier] || TIER_BORDER_CLASSES.Basic;
-  const badge = TIER_BADGES[tier] || TIER_BADGES.default;
 
   return (
-    <div className={`avatar-wrapper ${size} ${borderClass}`}>
-      <div className="avatar-inner">
+    <div className={`nd-av nd-av-${size} nd-ring-${frame}`}>
+      <div className="nd-av-in">
         {user?.avatarUrl ? <img src={user.avatarUrl} alt={username} /> : <span>{username.charAt(0).toUpperCase()}</span>}
       </div>
-      <span className={`tier-icon-badge badge-${badge}`} aria-label={`${tier} tier`}>{badge === 'crown' ? 'C' : badge === 'nebula' ? 'N' : 'S'}</span>
+      <span className="nd-av-badge" aria-label={`${tier} tier`}>{TIER_BADGES[tier] || 'S'}</span>
     </div>
   );
 }

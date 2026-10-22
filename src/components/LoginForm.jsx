@@ -5,6 +5,8 @@ export default function LoginForm({
   onClose,
   onAuth,
   onGoogleSignIn,
+  googleError,
+  isGoogleLoading,
 }) {
   const firstInputRef = useRef(null);
   const [username, setUsername] = useState('');
@@ -62,10 +64,11 @@ export default function LoginForm({
             {!isSignUp && <a href="#forgot" className="forgot-pass-link">Forgot password?</a>}
           </div>
           <div className="divider-or">or</div>
-          <button type="button" className="google-btn" onClick={onGoogleSignIn}>
+          <button type="button" className="google-btn" onClick={onGoogleSignIn} disabled={isGoogleLoading}>
             <span className="social-letter google-letter" aria-hidden="true">G</span>
-            Sign in with Google
+            {isGoogleLoading ? 'Connecting to Google...' : 'Sign in with Google'}
           </button>
+          {googleError && <span className="form-error" role="alert">{googleError}</span>}
           <button type="submit" className="submit-btn-ref">{isSignUp ? 'Create Account' : 'Login'}</button>
         </form>
         <div className="bottom-signup-text">

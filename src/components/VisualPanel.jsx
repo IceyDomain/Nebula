@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { NebulaBrand } from './Brand';
 
 const SLIDES = [
   { image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop', tag: 'Explore Space' },
@@ -17,7 +18,7 @@ export default function VisualPanel({ isSignUp, setIsSignUp, onClearError = () =
       <div className="left-visual-overlay" aria-hidden="true" />
       <div className="visual-content">
         <div className="top-bar-left">
-          <span className="brand-title-left">Featured Projects</span>
+          <div className="brand-title-left"><NebulaBrand /></div>
           <div className="nav-pills" role="tablist" aria-label="Authentication options">
             <button type="button" role="tab" aria-selected={!isSignUp} className={`pill-btn ${!isSignUp ? 'active' : ''}`} onClick={() => { setIsSignUp(false); onClearError(); }}>
               Sign In
@@ -29,9 +30,9 @@ export default function VisualPanel({ isSignUp, setIsSignUp, onClearError = () =
         </div>
         <div className="bottom-bar-left">
           <div className="profile-badge">
-            <div className="avatar-img" aria-hidden="true">A</div>
+            <div className="avatar-img" aria-hidden="true">N</div>
             <div className="profile-info">
-              <strong>Nebula Student</strong>
+              <strong>Nebula Portal</strong>
               <span>{SLIDES[currentSlide].tag}</span>
             </div>
           </div>

@@ -47,9 +47,14 @@ export function getTierForLevel(level) {
   return 'Basic';
 }
 
+export function getDiscountedStorePrice(itemPrice, activeTier = 'Basic') {
+  const perks = TIER_PERKS[activeTier] || TIER_PERKS.Basic;
+  return Math.floor(itemPrice * (1 - perks.discount));
+}
+
 export function handleStorePurchase({ user, itemPrice, activeTier = user.tier || 'Basic' }) {
   const perks = TIER_PERKS[activeTier] || TIER_PERKS.Basic;
-  const finalPrice = Math.floor(itemPrice * (1 - perks.discount));
+  const finalPrice = getDiscountedStorePrice(itemPrice, activeTier);
 
   if (user.credits < finalPrice) {
     alert(`Not enough credits. You need ${finalPrice} credits.`);
