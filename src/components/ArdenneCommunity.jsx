@@ -1,6 +1,7 @@
 // Ardenne High School version of the Community forum. It starts empty: no sample topics and no categories.
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { calculatePublishingFee } from '../utils/publishingRates';
+import useCommunityForum from '../utils/useCommunityForum';
 
 const NEBULA_CATEGORIES = [
   { name: 'Quantum Mathematics', color: '#a855f7', desc: 'Calculus, Functions, Algebra & Logic problems.', topics: 128 },
@@ -8,29 +9,8 @@ const NEBULA_CATEGORIES = [
   { name: 'Computer Science', color: '#2dd4bf', desc: 'Algorithms, Web Portals, React & Code Snippets.', topics: 312 },
   { name: 'General Discussion', color: '#facc15', desc: 'Study tips, social hub, and casual study lounge.', topics: 540 },
 ];
-const DEFAULT_TOPICS = [
-  { id: 1, title: 'Auburn Rebooted Devlog & Poll', category: 'Computer Science', author: 'Spike', tier: 'Gold', repliesCount: 3, views: '2.1k', lastActivity: '1h', createdAt: 1, content: 'Here is the latest preview of the boss fight mechanics. Vote below on which boss style we should code next.', poll: { question: 'Which boss mechanic should we implement?', options: [{ id: 'opt1', text: 'Bullet Hell', votes: 1 }, { id: 'opt2', text: 'Peyton Chases You', votes: 0 }, { id: 'opt3', text: 'Street Fighter Style', votes: 2 }] }, replies: [] },
-  { id: 2, title: 'Tips for mastering 3D Orbital Mechanics', category: 'Astro Physics', author: 'AstraStudent', tier: 'Diamond', repliesCount: 42, views: '1.2k', lastActivity: '12m', createdAt: 2, content: 'Orbital velocity calculations get much simpler when breaking vectors into state matrices.', replies: [] },
-  { id: 3, title: 'React Hooks State Leak Solution', category: 'Computer Science', author: 'CosmicCoder', tier: 'Diamond', repliesCount: 19, views: '850', lastActivity: '45m', createdAt: 3, content: 'A discussion about isolating state between signed-in accounts.', replies: [] },
-];
-
-function normalizeTopic(topic) {
-  return { ...topic, title: topic.title || 'Community Topic', content: topic.content || topic.text || '', category: topic.category || 'General Discussion', author: String(topic.author || 'Anonymous'), tier: topic.tier || 'Basic', repliesCount: Number(topic.repliesCount ?? topic.replies) || 0, views: topic.views || '1', lastActivity: topic.lastActivity || 'Just now', createdAt: topic.createdAt || topic.id || Date.now(), replies: Array.isArray(topic.replies) ? topic.replies : [] };
-}
-
-function readTopics(storageKey, publishedNotes, fallback) {
-  try {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
-    if (Array.isArray(saved)) return saved.map(normalizeTopic);
-  } catch {
-    // Use existing notes when forum storage is invalid.
-  }
-  return publishedNotes.length ? publishedNotes.map(normalizeTopic) : fallback;
-}
-
 // theme="ardenne" starts with an empty forum (no sample topics, no categories).
-// storageKey keeps each organization's forum separate, e.g. "nebula_forum_topics_ardenne".
-export default function ArdenneCommunity({ publishedNotes = [], user, currentUser, onPublishTransaction, theme = 'ardenne', storageKey = 'nebula_forum_topics_ardenne' }) {
+export default function ArdenneCommunity({ user, currentUser, onPublishTransaction, theme = 'ardenne' }) {
   const isSchool = theme === 'ardenne';
   const categories = isSchool ? [] : NEBULA_CATEGORIES;
   const categoryNames = categories.length ? categories.map((item) => item.name) : ['General Discussion'];
@@ -43,15 +23,17 @@ export default function ArdenneCommunity({ publishedNotes = [], user, currentUse
   const [content, setContent] = useState('');
   const [category, setCategory] = useState(categoryNames[categoryNames.length - 1]);
   const [replyText, setReplyText] = useState('');
-  const [topics, setTopics] = useState(() => readTopics(storageKey, publishedNotes, isSchool ? [] : DEFAULT_TOPICS));
+  const organizationId = user?.organization?.id || user?.orgId || 'ardenne-high-school';
+  const { topics, setTopics, status, error: forumError, refresh, createTopic: saveTopic, createReply: saveReply } = useCommunityForum(
+    isSchool ? `org:${organizationId}` : 'personal',
+    [],
+  );
   const [pollSelections, setPollSelections] = useState({});
   const [votedPolls, setVotedPolls] = useState({});
   const [likedReplies, setLikedReplies] = useState([]);
   const author = user?.username || currentUser || 'Anonymous';
   const fee = calculatePublishingFee(content, user?.tier);
   const selectedTopic = topics.find((topic) => topic.id === selectedTopicId) || null;
-
-  useEffect(() => { localStorage.setItem(storageKey, JSON.stringify(topics)); }, [topics, storageKey]);
 
   const filteredTopics = useMemo(() => topics.filter((topic) => `${topic.title} ${topic.category} ${topic.author} ${topic.content}`.toLowerCase().includes(searchQuery.toLowerCase())), [searchQuery, topics]);
   const displayedTopics = useMemo(() => {
@@ -60,13 +42,20 @@ export default function ArdenneCommunity({ publishedNotes = [], user, currentUse
     return filteredTopics;
   }, [activeTab, filteredTopics]);
 
-  const createTopic = (event) => {
+  const createTopic = async (event) => {
     event.preventDefault();
     if (!title.trim() || !content.trim()) return;
     if ((user?.credits || 0) < fee.finalCost) return alert(`You need ${fee.finalCost} Credits to post this topic.`);
-    if (onPublishTransaction && !onPublishTransaction(fee)) return;
-    const topic = normalizeTopic({ id: Date.now(), title: title.trim(), content: content.trim(), category, author, tier: user?.tier || 'Basic', createdAt: Date.now(), creditCost: fee.finalCost, earnedExp: fee.earnedExp });
-    setTopics([topic, ...topics]); setTitle(''); setContent(''); setShowNewTopicModal(false);
+    if (status !== 'connected') return;
+    try {
+      await saveTopic({ title: title.trim(), content: content.trim(), category, author, tier: user?.tier || 'Basic', creditCost: fee.finalCost, earnedExp: fee.earnedExp });
+      if (onPublishTransaction && !onPublishTransaction(fee)) return;
+      setTitle('');
+      setContent('');
+      setShowNewTopicModal(false);
+    } catch {
+      // The shared forum hook exposes the posting error in the community status message.
+    }
   };
 
   const openTopic = (topic) => {
@@ -86,12 +75,15 @@ export default function ArdenneCommunity({ publishedNotes = [], user, currentUse
     setLikedReplies([...likedReplies, key]);
     setTopics(topics.map((topic) => topic.id === selectedTopic.id ? { ...topic, replies: topic.replies.map((reply) => reply.id === replyId ? { ...reply, likes: (reply.likes || 0) + 1 } : reply) } : topic));
   };
-  const addReply = (event) => {
+  const addReply = async (event) => {
     event.preventDefault();
-    if (!replyText.trim()) return;
-    const reply = { id: Date.now(), author, tier: user?.tier || 'Basic', text: replyText.trim(), likes: 0 };
-    setTopics(topics.map((topic) => topic.id === selectedTopic.id ? { ...topic, replies: [...topic.replies, reply], repliesCount: topic.repliesCount + 1, lastActivity: 'Just now' } : topic));
-    setReplyText('');
+    if (!replyText.trim() || status !== 'connected') return;
+    try {
+      await saveReply(selectedTopic.id, { author, tier: user?.tier || 'Basic', text: replyText.trim() });
+      setReplyText('');
+    } catch {
+      // The shared forum hook exposes the posting error in the community status message.
+    }
   };
 
   return (
@@ -100,6 +92,14 @@ export default function ArdenneCommunity({ publishedNotes = [], user, currentUse
         <div className="nd-crumb">{isSchool ? 'Portal' : 'Nebula'} / <span>Community</span></div>
         <h1 className="nd-ttl">Community Forum</h1>
         <p className="nd-sub">Discuss course concepts, collaborate on projects and share study docs.</p>
+      </div>
+      <div className="nd-card" role={status === 'offline' ? 'alert' : 'status'}>
+        {status === 'connected'
+          ? `Connected to the shared ${isSchool ? 'school' : 'personal'} community. Names and organization membership are not verified; do not post private information.`
+          : status === 'loading'
+            ? 'Connecting to the shared community...'
+            : `Shared community unavailable: ${forumError} Locally saved posts may be shown; new posts and replies are disabled.`}
+        {status === 'offline' && <button type="button" className="nd-btn sm" onClick={refresh}>Retry connection</button>}
       </div>
 
       {selectedTopic ? (
@@ -141,8 +141,8 @@ export default function ArdenneCommunity({ publishedNotes = [], user, currentUse
               );
             })}
             <form onSubmit={addReply} style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
-              <textarea className="nd-inp" rows="3" aria-label="Reply to topic" placeholder="Join the discussion..." value={replyText} onChange={(event) => setReplyText(event.target.value)} required />
-              <div><button type="submit" className="nd-btn">Reply</button></div>
+              <textarea className="nd-inp" rows="3" aria-label="Reply to topic" placeholder="Join the discussion..." value={replyText} onChange={(event) => setReplyText(event.target.value)} required disabled={status !== 'connected'} />
+              <div><button type="submit" className="nd-btn" disabled={status !== 'connected'}>Reply</button></div>
             </form>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function ArdenneCommunity({ publishedNotes = [], user, currentUse
             <div className="nd-tabs" style={{ flex: 1 }}>
               {['Categories', 'Latest', 'Top'].map((tab) => <button type="button" key={tab} className={activeTab === tab ? 'active' : ''} onClick={() => setActiveTab(tab)}>{tab}</button>)}
             </div>
-            <button type="button" className="nd-btn" onClick={() => setShowNewTopicModal(true)}>+ New Topic</button>
+            <button type="button" className="nd-btn" onClick={() => setShowNewTopicModal(true)} disabled={status !== 'connected'}>+ New Topic</button>
           </div>
 
           <div className="nd-cols">
@@ -202,7 +202,7 @@ export default function ArdenneCommunity({ publishedNotes = [], user, currentUse
                 <span style={{ fontSize: 14, color: '#a8a3bd' }}>Cost: <strong style={{ color: '#f2f0fa' }}>{fee.finalCost} Credits</strong> (+{fee.earnedExp} EXP)</span>
                 <span style={{ display: 'flex', gap: 10 }}>
                   <button type="button" className="nd-btn ghost" onClick={() => setShowNewTopicModal(false)}>Cancel</button>
-                  <button type="submit" className="nd-btn">Post Topic</button>
+                  <button type="submit" className="nd-btn" disabled={status !== 'connected'}>Post Topic</button>
                 </span>
               </div>
             </form>

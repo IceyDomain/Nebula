@@ -1,12 +1,23 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "frozen-nebula",
+  "main": "src/worker.js",
   "compatibility_date": "2026-10-19",
   "observability": {
     "enabled": true
   },
   "assets": {
     "directory": "dist",
-    "not_found_handling": "single-page-application"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "COMMUNITY_DB",
+      "database_name": "nebula-community",
+      "database_id": "58b375f4-2dce-4bbd-aff8-e6db28b4a817",
+      "migrations_dir": "migrations"
+    }
+  ]
 }

@@ -61,7 +61,6 @@ export default function ArdenneDashboard({ user, onSignOut }) {
   const profileBgKey = `nebula_active_bg_${username}`;
   const purchasedBgsKey = `nebula_purchased_bgs_${username}`;
   const publishedNotesKey = `nebula_published_notes_${username}`;
-  const forumStorageKey = `nebula_forum_topics_ardenne_${username}`;
   const [activeBg, setActiveBg] = useState(() => localStorage.getItem(profileBgKey) || defaultBg);
   const [purchasedBgs, setPurchasedBgs] = useState(() => {
     if (Array.isArray(user.purchasedBgs)) return user.purchasedBgs;
@@ -222,7 +221,7 @@ export default function ArdenneDashboard({ user, onSignOut }) {
         <main className="nd-content">
           {activeTab === 'dashboard' && <DashboardHome theme={theme} credits={credits} tier={tier} exp={exp} notesCount={publishedNotes.length} timetableKey={`${prefix}_timetable_${username}`} onNavigate={setActiveTab} />}
           {activeTab === 'notes' && <ArdenneDocs theme={theme} credits={credits} user={fullUser} onPublish={handlePublish} onUpdateCredits={(value, newExp = exp) => updateUserData(value, tier, newExp)} onEditorStateChange={setIsEditingDoc} />}
-          {activeTab === 'shared' && <ArdenneCommunity theme={theme} storageKey={forumStorageKey} publishedNotes={publishedNotes} currentUser={username} user={fullUser} onPublishTransaction={chargePublishing} />}
+          {activeTab === 'shared' && <ArdenneCommunity theme={theme} currentUser={username} user={fullUser} onPublishTransaction={chargePublishing} />}
           {activeTab === 'timetable' && <ArdenneTimetable key={`${prefix}-${username}`} theme={theme} storageKey={`${prefix}_timetable_${username}`} />}
           {activeTab === 'store' && <ArdenneStore theme={theme} credits={credits} tier={tier} purchasedBgs={purchasedBgs} unlockedBorders={unlockedBorders} unlockedTemplates={unlockedTemplates} equippedBorder={equippedBorder} onPurchaseBackground={purchaseBackground} onPurchaseTier={purchaseTier} onPurchaseFrame={(frame, cost) => purchaseProfileItem('unlockedBorders', frame, cost)} onEquipFrame={equipFrame} onPurchaseTemplate={(template, cost) => purchaseProfileItem('unlockedTemplates', template, cost)} />}
           {activeTab === 'settings' && <ArdenneSettings theme={theme} orgName={orgName} user={fullUser} activeBg={activeBg} purchasedBgs={purchasedBgs} initialSection={settingsSection} onSelectBackground={selectBackground} onEquipFrame={equipFrame} onNavigateToStore={() => setActiveTab('store')} onSignOut={onSignOut} />}

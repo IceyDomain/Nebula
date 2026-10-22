@@ -51,11 +51,27 @@ Google sign-in creates or reuses a regular local Nebula account. This prototype 
 
 The dashboard profile menu links to profile settings, where users can equip purchased avatar frames. The store supports background purchases, membership upgrades, avatar frames, and document templates. Tier discounts are shown in store prices and applied to the charge. Purchased document templates are available in Notes & Docs.
 
-Profile data, purchases, documents, schedules, and community posts currently use browser `localStorage`. They are local to the browser and are not synced across devices or shared between users.
+Profile data, purchases, documents, and schedules use browser `localStorage` and are not synced across devices. Community topics and replies use the Cloudflare D1 API: personal accounts share one forum and each configured organization has its own forum. The current browser-only sign-in is not verified by the API, and organization membership is not enforced server-side; treat names and forum contents as public and unverified.
+
+## Shared community database
+
+The community API is served by the Cloudflare Worker configured in `wrangler.jsonc`. Before local or production use, create a D1 database and replace the placeholder `database_id` in that file with the UUID returned by Cloudflare:
+
+```sh
+npx wrangler d1 create nebula-community
+```
+
+Run `npm run dev:cloudflare` to build the site and start the Worker with a local D1 database. Local migrations are in `migrations/`. For deployment, authenticate Wrangler with the Cloudflare account that owns the site and run:
+
+```sh
+npm run deploy
+```
+
+The deploy script applies D1 migrations remotely before deploying the Worker and static assets. Community data is not shared until the Worker is deployed with a real D1 database ID. The API currently accepts browser-supplied poster names and organization scopes because account authentication is client-side only; it does not verify identities or school membership. Do not treat those names as verified identities or post private information.
 
 ## Remaining integrations
 
-- Connect community posts, school announcements, and activity feeds to a shared backend; forum data is currently local to each browser/account.
+- Connect school announcements and activity feeds to a shared backend.
 - Integrate Google Classroom data; the current dashboard link only opens Classroom.
 - Add backend account storage and server-side Google credential verification before using this prototype with real user data.
 - The older `PersonalTimetable` component is not routed in the app; its desktop notification option is not available in the active timetable screen.
