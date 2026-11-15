@@ -6,6 +6,13 @@ export const GRADES = [7, 8, 9, 10, 11, 12, 13];
 export const FORMS = [1, 2, 3, 4, 5, 6, 7, 8];
 export const HOUSES = [
   { id: 'olson', name: 'Olson', color: '#dc2626' },
+  { id: 'cohen', name: 'Cohen', color: '#2563eb' },
+  { id: 'mills', name: 'Mills', color: '#9333ea' },
+  { id: 'harrisson', name: 'Harrisson', color: '#f97316' },
+  { id: 'gayle', name: 'Gayle', color: '#ec4899' },
+  { id: 'colter', name: 'Colter', color: '#16a34a' },
+  { id: 'grant', name: 'Grant', color: '#d2b48c' },
+  { id: 'phelps', name: 'Phelps', color: '#eab308' },
 ];
 export const HOUSE_RULES_TEXT = 'House points are associated with Sports Day. The specific point-awarding rules have not been confirmed yet.';
 export const CLUB_CATEGORIES = ['Academic', 'Sports', 'Arts', 'Service', 'Other'];

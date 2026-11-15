@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Banner, Dialog, Empty, PageHead, Stat } from './ArdennePortalUI';
 import { HOUSES, HOUSE_RULES_TEXT, awardPoints, getHouseOf, getHousePoints, getPointLog, timeAgo } from './ardennePortalData';
 
-// House names, colors and rules live in ardennePortalData.js until the school confirms its house system.
 export default function ArdenneHouses({ viewer }) {
   const isTeacher = viewer.role === 'teacher';
   const [tick, setTick] = useState(0);

@@ -15,7 +15,7 @@
 .nd-side { width:260px; flex:none; position:sticky; top:0; height:100vh; height:100dvh; background:var(--side); border-right:1px solid var(--line); padding:24px 16px; display:flex; flex-direction:column; gap:28px; }
 .nd[data-theme="ardenne"] .nd-side { border-top:4px solid var(--acc2); }
 .nd-brand { display:flex; align-items:center; gap:10px; padding:0 8px; min-height:44px; }
-.nd-brand img.nd-star { height:30px; width:auto; } .nd-brand img.nd-word { height:17px; width:auto; }
+.nd-brand img.nd-star { height:30px; width:auto; }
 .nd-brand img.nd-christmas-wordmark { width:150px; height:118px; object-fit:contain; }
 .nd-brand b { display:block; font:700 14px/1.25 var(--head); } .nd-brand small { display:block; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--acc2); }
 .nd-nav { display:flex; flex-direction:column; gap:6px; }

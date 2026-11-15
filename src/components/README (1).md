@@ -25,5 +25,5 @@ Event: Dec 15 to Jan 1. Items bought stay usable all year.
 Edit dates and prices at the top of christmas.js.
 
 ## Things to set
-- ardennePortalData.js: grades are 7-13 and forms are 1-8. Olson (red) is the only confirmed house so far; other house names and the specific Sports Day point-awarding rules are still to be confirmed.
+- ardennePortalData.js: grades are 7-13, forms are 1-8, and the houses are Olson (red), Cohen (blue), Mills (purple), Harrisson (orange), Gayle (pink), Colter (green), Grant (beige), and Phelps (yellow). The specific Sports Day point-awarding rules are still to be confirmed.
 - Data (announcements, clubs, house points, who is in which form) is saved in each browser for now.
