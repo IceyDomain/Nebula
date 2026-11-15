@@ -12,6 +12,59 @@ test('renders the Nebula landing page', () => {
   expect(screen.getByRole('link', { name: 'Privacy Policy' }).getAttribute('href')).toBe('/privacy.html');
 });
 
+test('shows Christmas preview decorations on the landing page when requested', () => {
+  const originalPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  localStorage.clear();
+  window.history.replaceState({}, '', '/?christmas-preview=1');
+  const siteIcon = document.createElement('link');
+  siteIcon.rel = 'icon';
+  siteIcon.href = '/nebula-star.png';
+  const touchIcon = document.createElement('link');
+  touchIcon.rel = 'apple-touch-icon';
+  touchIcon.href = '/nebula-star.png';
+  document.head.append(siteIcon, touchIcon);
+
+  render(<App />);
+
+  expect(document.querySelector('.app-root')?.getAttribute('data-event')).toBe('christmas');
+  expect(screen.getByText('Christmas preview')).toBeDefined();
+  expect(screen.getByAltText('Nebula Christmas logo').getAttribute('src')).toBe('/christmas-logo.png');
+  expect(document.querySelector('.lp-header-christmas-logo')?.getAttribute('src')).toBe('/christmas-logo.png');
+  expect(document.querySelector('.lp-site-hat')).toBeNull();
+  expect(siteIcon.getAttribute('href')).toBe('/christmas-site-logo.svg?v=4');
+  expect(siteIcon.getAttribute('type')).toBe('image/svg+xml');
+  expect(touchIcon.getAttribute('href')).toBe('/nebula-star.png');
+
+  window.history.replaceState({}, '', originalPath);
+  siteIcon.remove();
+  touchIcon.remove();
+  localStorage.clear();
+});
+
+test('applies the Christmas palette and site-logo accent to a personal dashboard preview', async () => {
+  const originalPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  localStorage.clear();
+  window.history.replaceState({}, '', '/?christmas-preview=1');
+  localStorage.setItem('nebula_active_user', JSON.stringify({
+    username: 'preview-user',
+    email: 'preview@example.com',
+    role: 'user',
+    credits: 2000,
+    tier: 'Basic',
+  }));
+
+  render(<App />);
+
+  await waitFor(() => expect(document.querySelector('.nd[data-event="christmas"]')).not.toBeNull());
+  expect(document.querySelector('.nd')?.getAttribute('style')).toContain('linear-gradient');
+  expect(document.querySelector('.nd-brand .nd-christmas-wordmark')?.getAttribute('src')).toBe('/christmas-logo.png');
+  expect(document.querySelector('.nd-site-hat')).toBeNull();
+  expect(screen.getByRole('region', { name: 'Christmas event' })).toBeDefined();
+
+  window.history.replaceState({}, '', originalPath);
+  localStorage.clear();
+});
+
 test('restores an existing session without deleting it during startup', async () => {
   localStorage.clear();
   const user = {
@@ -86,12 +139,17 @@ test('creates an organization account from the organization sign-in flow', async
   fireEvent.change(organizationForm.getByLabelText('Username'), { target: { value: 'schooluser' } });
   fireEvent.change(organizationForm.getByLabelText('Email address'), { target: { value: 'school@example.com' } });
   fireEvent.change(organizationForm.getByLabelText('Password'), { target: { value: 'securepass123' } });
+  fireEvent.change(organizationForm.getByLabelText('Grade level'), { target: { value: '7' } });
+  fireEvent.change(organizationForm.getByLabelText('Form'), { target: { value: '1' } });
   fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
   await waitFor(() => {
     const activeUser = JSON.parse(localStorage.getItem('nebula_active_user'));
     expect(activeUser.username).toBe('schooluser');
     expect(activeUser.organization.name).toBe('Ardenne High School');
+    expect(activeUser.role).toBe('student');
+    expect(activeUser.grade).toBe(7);
+    expect(activeUser.form).toBe(1);
   });
 });
 

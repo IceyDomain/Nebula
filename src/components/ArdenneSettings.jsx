@@ -1,17 +1,18 @@
 // Ardenne High School version of the Settings page.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { calculateProgress } from '../utils/tierSystem';
-import UserAvatar from './UserAvatar';
+import { ITEMS as XMAS_ITEMS, owns as ownsXmas } from './christmas';
 
 const BASE_DEFAULTS = [{ name: 'Solid Black', value: '#000000' }, { name: 'Classic White', value: '#ffffff' }];
 const ANIMATED_PREVIEW = 'linear-gradient(-45deg, #0d001a, #001233)';
 const swatch = (value) => (value.startsWith('animated-') ? ANIMATED_PREVIEW : value);
 
-export default function ArdenneSettings({ user, activeBg, purchasedBgs, onSelectBackground, onSignOut, onEquipFrame, onNavigateToStore, initialSection = 'appearance', theme = 'ardenne', orgName = 'Ardenne High School' }) {
+export default function ArdenneSettings({ user, activeBg, purchasedBgs, unlockedBorders = [], equippedBorder = 'none', onEquipFrame, initialSection = 'appearance', onNavigateToStore, onSelectBackground, onSignOut, theme = 'ardenne', orgName = 'Ardenne High School', christmas, onToggleChristmas }) {
   const [section, setSection] = useState(initialSection);
   const [previewBg, setPreviewBg] = useState(null);
-  const firstDefault = theme === 'ardenne' ? { name: 'Ardenne Blue', value: '#08153A' } : { name: 'Default Purple', value: '#120024' };
-  const defaults = [firstDefault, ...BASE_DEFAULTS];
+  useEffect(() => setSection(initialSection), [initialSection]);
+  const firstDefault = theme === 'ardenne' ? { name: 'Ardenne Light', value: '#eef2f9' } : { name: 'Default Purple', value: '#120024' };
+  const defaults = [firstDefault, ...(theme === 'ardenne' ? [{ name: 'Ardenne Navy', value: '#08153A' }] : []), ...BASE_DEFAULTS];
   const extras = purchasedBgs.filter((value) => !defaults.some((background) => background.value === value));
   const backgrounds = [...defaults, ...extras.map((value, index) => ({ name: `Custom Background ${index + 1}`, value }))];
   const apply = (value) => { onSelectBackground(value); setPreviewBg(null); };
@@ -27,7 +28,7 @@ export default function ArdenneSettings({ user, activeBg, purchasedBgs, onSelect
 
       <div className="nd-setwrap" style={{ marginTop: 24 }}>
         <nav className="nd-card nd-setnav" aria-label="Settings sections">
-          {[['profile', 'Profile'], ['appearance', 'Appearance'], ['account', 'Account']].map(([key, label]) => (
+          {[['profile', 'Profile'], ['appearance', 'Appearance'], ...(christmas && christmas.owned.length > 0 ? [['event', 'Christmas']] : []), ['account', 'Account']].map(([key, label]) => (
             <button type="button" key={key} className={section === key ? 'active' : ''} onClick={() => setSection(key)}>{label}</button>
           ))}
         </nav>
@@ -35,31 +36,21 @@ export default function ArdenneSettings({ user, activeBg, purchasedBgs, onSelect
         <div className="nd-card" style={{ padding: 0 }}>
           {section === 'profile' && (
             <>
-              <div className="nd-sethd"><h3>Profile</h3><p>Manage the profile and items that are shown throughout your workspace.</p></div>
-              <div className="nd-setrow">
-                <span className="k">Avatar</span>
-                <UserAvatar user={user} size="md" />
-                <span className="v">{user.username}</span>
-                <button type="button" className="nd-btn sm" onClick={onNavigateToStore}>Visit Store</button>
-              </div>
+              <div className="nd-sethd"><h3>Profile</h3></div>
               <Row k="Username" v={user.username} />
-              <Row k="Email" v={user.email || 'Not provided'} />
               <Row k="Organization" v={orgName || 'Personal account'} />
               <Row k="Tier" v={user.tier || 'Basic'} />
               <Row k="Level" v={level} />
-              <div className="nd-setrow">
-                <span className="k">Avatar frame</span>
-                <span className="v">{user.equippedBorder === 'none' ? 'Tier frame' : `${user.equippedBorder} frame`}</span>
-                <button type="button" className="nd-btn sm ghost" disabled={!user.equippedBorder || user.equippedBorder === 'none'} onClick={() => onEquipFrame('none')}>Use tier frame</button>
-              </div>
-              {(user.unlockedBorders || []).filter((frame) => frame !== 'none').map((frame) => (
+              {unlockedBorders.filter((frame) => frame !== 'none').map((frame) => (
                 <div className="nd-setrow" key={frame}>
-                  <span className="k">{frame} frame</span>
-                  <span className="v">{user.equippedBorder === frame ? 'Equipped' : 'Unlocked'}</span>
-                  <button type="button" className="nd-btn sm" disabled={user.equippedBorder === frame} onClick={() => onEquipFrame(frame)}>{user.equippedBorder === frame ? 'Equipped' : 'Equip'}</button>
+                  <span className="v">{frame} Frame</span>
+                  <button type="button" className="nd-btn sm" disabled={equippedBorder === frame} onClick={() => onEquipFrame?.(frame)}>{equippedBorder === frame ? 'Equipped' : 'Equip'}</button>
                 </div>
               ))}
-              <Row k="Document templates" v={(user.unlockedTemplates || []).length ? user.unlockedTemplates.join(', ') : 'None unlocked'} />
+              <div className="nd-setrow">
+                <span className="v">Unlock frames, backgrounds and more.</span>
+                <button type="button" className="nd-btn sm" onClick={onNavigateToStore}>Visit Store</button>
+              </div>
             </>
           )}
 
@@ -78,6 +69,18 @@ export default function ArdenneSettings({ user, activeBg, purchasedBgs, onSelect
                   </div>
                 );
               })}
+            </>
+          )}
+
+          {section === 'event' && christmas && (
+            <>
+              <div className="nd-sethd"><h3>Christmas</h3><p>Switch your Christmas items on or off.</p></div>
+              {XMAS_ITEMS.filter((item) => ownsXmas(christmas, item.id)).map((item) => (
+                <div className="nd-setrow" key={item.id}>
+                  <span className="v">{item.name}</span>
+                  <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}><input type="checkbox" checked={!!christmas.active[item.id]} onChange={(e) => onToggleChristmas(item.id, e.target.checked)} />Use</label>
+                </div>
+              ))}
             </>
           )}
 

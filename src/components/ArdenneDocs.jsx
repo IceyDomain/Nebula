@@ -1,7 +1,7 @@
 // Ardenne High School version of the Notes & Docs page.
 import { useEffect, useState } from 'react';
-import { publishDocumentToCommunity } from '../utils/communityDocuments';
 import { calculatePublishingFee } from '../utils/publishingRates';
+import { publishDocumentToCommunity } from '../utils/communityDocuments';
 import ArdenneDocEditor from './ArdenneDocEditor';
 import { htmlToText, PREMIUM_TEMPLATE_CONTENT, templateHtml, textToHtml } from './DocEditorCore';
 
@@ -18,7 +18,7 @@ function readDocuments(username) {
   }
 }
 
-export default function ArdenneDocs({ credits, user, onPublish, onUpdateCredits, onEditorStateChange, theme = 'ardenne' }) {
+export default function ArdenneDocs({ credits, user, onPublish, onUpdateCredits, onEditorStateChange, theme = 'ardenne', christmasDoc = false, christmasDocOwned = false }) {
   const username = user?.username;
   const docsKey = getDocsKey(username);
   const [userDocs, setUserDocs] = useState(() => readDocuments(username));
@@ -27,12 +27,9 @@ export default function ArdenneDocs({ credits, user, onPublish, onUpdateCredits,
   const [docText, setDocText] = useState('');
   const [docHtml, setDocHtml] = useState('');
   const [query, setQuery] = useState('');
+  const wordCount = docText.trim() ? docText.trim().split(/\s+/).length : 0;
   const publishingFee = calculatePublishingFee(docText, user?.tier);
   const currentExp = user?.exp || 0;
-  const availableTemplates = [
-    ...TEMPLATES,
-    ...Object.keys(PREMIUM_TEMPLATE_CONTENT).filter((template) => user?.unlockedTemplates?.includes(template)),
-  ];
 
   useEffect(() => {
     setUserDocs(readDocuments(username));
@@ -76,22 +73,16 @@ export default function ArdenneDocs({ credits, user, onPublish, onUpdateCredits,
     saveDocuments(userDocs.map((document) => document.id === activeDocId ? { ...document, title: title || 'Untitled Document' } : document));
   };
 
+  const templates = [...TEMPLATES, ...(user?.unlockedTemplates || []).filter((name) => Object.hasOwn(PREMIUM_TEMPLATE_CONTENT, name) && !TEMPLATES.includes(name))];
+
   const handlePublish = async () => {
     if (!docText.trim()) return alert('Cannot publish an empty document.');
     if (credits < publishingFee.finalCost) return alert(`Not enough credits. You need ${publishingFee.finalCost} credits.`);
-    const document = {
-      id: Date.now(),
-      title: docTitle || 'Untitled Document',
-      text: docText,
-      html: docHtml || textToHtml(docText),
-      creditCost: publishingFee.finalCost,
-      earnedExp: publishingFee.earnedExp,
-      date: new Date().toLocaleDateString(),
-    };
     try {
-      await publishDocumentToCommunity({ document, fee: publishingFee, user, theme });
+      const document = { title: docTitle || 'Untitled Document', text: docText, html: docHtml };
+      const published = await publishDocumentToCommunity({ document, fee: publishingFee, user, theme });
       onUpdateCredits(credits - publishingFee.finalCost, currentExp + publishingFee.earnedExp);
-      onPublish(document);
+      onPublish({ id: published.id || Date.now(), ...document, words: wordCount, creditCost: publishingFee.finalCost, earnedExp: publishingFee.earnedExp, date: new Date().toLocaleDateString() });
       alert('Published to the Community forum.');
     } catch (error) {
       alert(`Unable to publish this document to the Community forum. ${error.message}`);
@@ -106,6 +97,8 @@ export default function ArdenneDocs({ credits, user, onPublish, onUpdateCredits,
         title={docTitle}
         initialHtml={docHtml}
         fee={publishingFee}
+        docTheme={christmasDoc ? 'christmas' : null}
+        themesOwned={christmasDocOwned}
         onTitleChange={handleTitle}
         onChange={handleChange}
         onBack={closeEditor}
@@ -125,7 +118,7 @@ export default function ArdenneDocs({ credits, user, onPublish, onUpdateCredits,
       <div>
         <h2 className="nd-sec">Start a new document</h2>
         <div className="nd-g4">
-          {availableTemplates.map((label) => (
+          {templates.map((label) => (
             <button type="button" className="nd-tile" key={label} onClick={() => createDocument(label)}>
               <div className={`nd-paper ${label === 'Blank document' ? 'blank' : ''}`}>{label === 'Blank document' ? '+' : null}</div>
               {label}

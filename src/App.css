@@ -17,8 +17,85 @@ button, input, select { font: inherit; }
 button { cursor: pointer; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
+@keyframes christmasPreviewSnow { to { background-position: 55px 220px; } }
+.app-root[data-event="christmas"] {
+  position: relative;
+  isolation: isolate;
+}
+.app-root[data-event="christmas"] > :not(.christmas-preview-badge) {
+  position: relative;
+  z-index: 2;
+}
+.app-root[data-event="christmas"]::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: 4px;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(45deg, #b91c1c 0 12px, #fff 12px 24px, #166534 24px 36px);
+}
+.app-root[data-event="christmas"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .22;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 140px 90px, #fff, transparent),
+    radial-gradient(3px 3px at 80px 170px, #fff, transparent),
+    radial-gradient(2px 2px at 210px 40px, #fff, transparent);
+  background-size: 260px 220px;
+  animation: christmasPreviewSnow 14s linear infinite;
+}
+.christmas-preview-badge {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 4;
+  padding: 9px 14px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 999px;
+  background: rgba(91, 24, 24, .94);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.24);
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.app-root[data-event="christmas"] .lp {
+  --accent: #b91c1c;
+  --muted: #c6d3cc;
+  --line: rgba(226, 232, 240, .16);
+  background-color: #081c16;
+  background-image:
+    linear-gradient(115deg, rgba(5, 23, 18, .82), rgba(8, 12, 24, .76)),
+    url("/nebula-galaxy.png");
+}
+.app-root[data-event="christmas"] .lp-pill {
+  border-color: rgba(134, 239, 172, .38);
+  background: rgba(20, 83, 45, .22);
+  color: #dcfce7;
+}
+.app-root[data-event="christmas"] .lp-logo-panel {
+  border-color: rgba(134, 239, 172, .24);
+  background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(20,83,45,.18));
+  box-shadow: 0 24px 64px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.app-root[data-event="christmas"] .lp-logo-star { filter: drop-shadow(0 10px 28px rgba(74, 222, 128, .28)); }
+.app-root[data-event="christmas"] .lp-btn-primary {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  box-shadow: 0 8px 24px rgba(127, 29, 29, .3);
+}
+.app-root[data-event="christmas"] .lp-open strong { color: #86efac; }
+
 @keyframes bgPulse { from { transform: scale(1); } to { transform: scale(1.03); } }
 @media (prefers-reduced-motion: reduce) { .reference-card { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .app-root[data-event="christmas"]::after { animation: none; }
+}
 
 .btn-nebula, .portal-entry-btn { background: linear-gradient(135deg, var(--nebula-purple), var(--nebula-magenta)); color: #fff; border: 0; border-radius: 20px; font-weight: 700; box-shadow: 0 0 20px rgba(124, 58, 237, .4); transition: transform .2s ease, box-shadow .2s ease; }
 .btn-nebula:hover, .btn-nebula:focus-visible, .portal-entry-btn:hover, .portal-entry-btn:focus-visible { transform: translateY(-2px); box-shadow: 0 0 28px rgba(217, 70, 239, .6); }
@@ -42,12 +119,12 @@ button { cursor: pointer; }
 .top-bar-left, .bottom-bar-left, .top-bar-right { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .brand-title-left { font-size: .9rem; font-weight: 700; letter-spacing: .05em; }
 .nav-pills, .carousel-controls { display: flex; align-items: center; gap: 8px; }
-.pill-btn { padding: 6px 14px; color: #fff; background: transparent; border: 1px solid transparent; border-radius: 20px; font-size: .8rem; font-weight: 600; transition: background .2s ease, border-color .2s ease; }
+.pill-btn { padding: 6px 14px; color: #fff; background: transparent; border: 1px solid transparent; border-radius: 20px; font-size: .8rem; font-weight: 700; text-shadow: 0 1px 3px #000, 0 0 5px #000; transition: background .2s ease, border-color .2s ease; }
 .pill-btn:hover, .pill-btn.active { background: rgba(255, 255, 255, .2); border-color: rgba(255, 255, 255, .4); }
 .profile-badge { display: flex; align-items: center; gap: 12px; }
 .avatar-img { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(135deg, var(--nebula-magenta), var(--nebula-cyan)); color: #fff; font-weight: 800; box-shadow: 0 4px 12px rgba(217, 70, 239, .4); }
-.profile-info strong { display: block; font-size: .95rem; }
-.profile-info span { font-size: .75rem; color: var(--nebula-cyan); }
+.profile-info strong { display: block; color: #fff; font-size: .95rem; font-weight: 800; text-shadow: 0 1px 3px #000, 0 0 5px #000; }
+.profile-info span { color: #fff; font-size: .75rem; font-weight: 700; text-shadow: 0 1px 3px #000, 0 0 5px #000; }
 .carousel-controls { gap: 10px; margin-right: 28px; }
 .arrow-btn { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.3); border-radius: 50%; background: rgba(7,7,20,.6); color: #fff; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .arrow-btn:hover { background: var(--nebula-purple); border-color: var(--nebula-magenta); transform: scale(1.05); }

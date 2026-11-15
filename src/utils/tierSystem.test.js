@@ -27,6 +27,21 @@ describe('store discounts', () => {
     alert.mockRestore();
   });
 
+  test('reports insufficient credits through the supplied notification handler', () => {
+    const alert = vi.spyOn(globalThis, 'alert').mockImplementation(() => {});
+    const onNotify = vi.fn();
+    const purchase = handleStorePurchase({
+      user: { credits: 25, exp: 0, tier: 'Basic' },
+      itemPrice: 100,
+      onNotify,
+    });
+
+    expect(purchase).toBeNull();
+    expect(onNotify).toHaveBeenCalledWith('Not enough credits. You need 100 credits.', 'error');
+    expect(alert).not.toHaveBeenCalled();
+    alert.mockRestore();
+  });
+
   test('awards two EXP per credit spent on publishing', () => {
     expect(calculatePublishingFee('A short note').earnedExp).toBe(20);
   });

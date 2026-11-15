@@ -8,7 +8,11 @@ import SettingsPage from './SettingsPage';
 import LevelProgressBar from './LevelProgressBar';
 import UserAvatar from './UserAvatar';
 import GameRoomView from './GameRoomView';
+import DashboardNotification from './DashboardNotification';
 import { NebulaBrand, ArdenneBrand } from './Brand';
+import { isEventActive, owns as ownsChristmas } from './christmas';
+import ChristmasEventBanner from './ChristmasEventBanner';
+import useChristmasEvent from './useChristmasEvent';
 import { TIER_PERKS, calculateProgress, handleStorePurchase, handleTierPurchase } from '../utils/tierSystem';
 
 const ARDENNE_ID = 'ardenne-high-school';
@@ -51,6 +55,7 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
   const navItems = isSchool ? NAV_ARDENNE : NAV_NEBULA;
 
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [notification, setNotification] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState('appearance');
   const [isEditingDoc, setIsEditingDoc] = useState(false);
@@ -61,6 +66,8 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
   const [unlockedTemplates, setUnlockedTemplates] = useState(() => user.unlockedTemplates || []);
   const [equippedBorder, setEquippedBorder] = useState(() => user.equippedBorder || 'none');
   const username = user.username || user.email?.split('@')[0] || 'Explorer';
+  const { christmas, buyChristmas, toggleChristmas, preview: christmasPreview } = useChristmasEvent(username);
+  const christmasLogoActive = christmas.active.logo || christmasPreview || isEventActive();
   const profileBgKey = `nebula_active_bg_${username}`;
   const purchasedBgsKey = `nebula_purchased_bgs_${username}`;
   const publishedNotesKey = `nebula_published_notes_${username}`;
@@ -83,6 +90,7 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
     }
   });
   const prefix = isSchool ? 'ardenne' : 'nebula';
+  const notify = (message, type = 'error') => setNotification({ message, type });
 
   useEffect(() => {
     setCredits(user.credits ?? 1000);
@@ -135,7 +143,7 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
   const purchaseProfileItem = (field, item, cost) => {
     const ownedItems = field === 'unlockedBorders' ? unlockedBorders : unlockedTemplates;
     if (ownedItems.includes(item)) return false;
-    const updatedUser = handleStorePurchase({ user: { ...user, credits, tier, exp }, itemPrice: cost, activeTier: tier });
+    const updatedUser = handleStorePurchase({ user: { ...user, credits, tier, exp }, itemPrice: cost, activeTier: tier, onNotify: notify });
     if (!updatedUser) return false;
     updateUserData(updatedUser.credits, updatedUser.tier, updatedUser.exp, { [field]: [...ownedItems, item] });
     return true;
@@ -153,7 +161,7 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
 
   const purchaseBackground = (background, cost) => {
     if (purchasedBgs.includes(background)) return false;
-    const updatedUser = handleStorePurchase({ user: { ...user, credits, tier, exp }, itemPrice: cost, activeTier: tier });
+    const updatedUser = handleStorePurchase({ user: { ...user, credits, tier, exp }, itemPrice: cost, activeTier: tier, onNotify: notify });
     if (!updatedUser) return false;
     const updatedBackgrounds = [...purchasedBgs, background];
     localStorage.setItem(purchasedBgsKey, JSON.stringify(updatedBackgrounds));
@@ -163,27 +171,38 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
   };
 
   const purchaseTier = (nextTier) => {
-    const updatedUser = handleTierPurchase({ user: { ...user, credits, tier, exp }, nextTier });
+    const updatedUser = handleTierPurchase({ user: { ...user, credits, tier, exp }, nextTier, onNotify: notify });
     if (!updatedUser) return false;
     updateUserData(updatedUser.credits, updatedUser.tier, updatedUser.exp);
-    alert(`${nextTier} Tier unlocked.`);
+    notify(`${nextTier} Tier unlocked.`, 'success');
     return true;
   };
+
+  const buyChristmasItem = (itemId) => buyChristmas(itemId, credits, (nextCredits) => {
+    updateUserData(nextCredits, tier, exp);
+  });
 
   const appBackgroundStyle = activeBg.startsWith('animated-')
     ? { background: 'linear-gradient(-45deg, #0d001a, #1f0036, #001233, #120024)', backgroundSize: '400% 400%', animation: 'nebulaGradient 12s ease infinite' }
     : activeBg.startsWith('http') || activeBg.startsWith('url(')
       ? { backgroundImage: `url(${activeBg.replace(/^url\(['"]?|['"]?\)$/g, '')})`, backgroundSize: 'cover', backgroundPosition: 'center' }
       : { backgroundColor: activeBg };
+  const christmasBackgroundStyle = theme === 'ardenne'
+    ? { background: '#f1f6f2' }
+    : { background: 'linear-gradient(135deg, #10271b, #0b1f16 70%, #08150f)' };
 
   const fullUser = { ...user, username, credits, tier, exp, purchasedBgs, unlockedBorders, unlockedTemplates, equippedBorder };
-  const classes = ['nd', isLightColor(activeBg) ? 'nd-light' : '', isEditingDoc ? 'nd-editing' : ''].filter(Boolean).join(' ');
+  const useLightColors = isLightColor(activeBg) && (!christmas.active.app || theme === 'ardenne');
+  const classes = ['nd', useLightColors ? 'nd-light' : '', isEditingDoc ? 'nd-editing' : ''].filter(Boolean).join(' ');
 
   return (
-    <div className={classes} data-theme={theme} style={appBackgroundStyle}>
+    <div className={classes} data-theme={theme} data-event={christmas.active.app ? 'christmas' : undefined} style={christmas.active.app ? christmasBackgroundStyle : appBackgroundStyle}>
+      <DashboardNotification notification={notification} onDismiss={() => setNotification(null)} />
       {!isEditingDoc && (
         <aside className="nd-side">
-          {isSchool ? <ArdenneBrand /> : <NebulaBrand />}
+          {isSchool
+            ? <ArdenneBrand />
+            : <NebulaBrand christmas={christmasLogoActive} />}
           <nav className="nd-nav" aria-label="Main navigation">
             {navItems.map(([tab, label]) => (
               <button type="button" key={tab} className={activeTab === tab ? 'active' : ''} aria-current={activeTab === tab ? 'page' : undefined} onClick={() => setActiveTab(tab)}>
@@ -194,7 +213,7 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
           </nav>
           {isSchool && <div className="nd-powered">Powered by Nebula</div>}
           <div className="nd-me">
-            <UserAvatar user={fullUser} size="sm" />
+            <UserAvatar user={fullUser} size="sm" frame={christmas.active.frame ? 'christmas' : equippedBorder} />
             <span><b>{username}</b><small>{tier} Member</small></span>
           </div>
         </aside>
@@ -211,7 +230,7 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
               <span className="nd-pill">{tier} Tier</span>
               <div className="nd-profile">
                 <button type="button" aria-label="Open profile menu" aria-expanded={isProfileOpen} onClick={() => setIsProfileOpen(!isProfileOpen)}>
-                  <UserAvatar user={fullUser} size="sm" />
+                  <UserAvatar user={fullUser} size="sm" frame={christmas.active.frame ? 'christmas' : equippedBorder} />
                 </button>
                 {isProfileOpen && (
                   <div className="nd-menu">
@@ -227,13 +246,14 @@ export default function StandardDashboard({ user, onSignOut, theme: themeProp })
         )}
 
         <main className="nd-content">
+          {christmas.active.app && !isEditingDoc && <ChristmasEventBanner />}
           {activeTab === 'dashboard' && <DashboardHome theme={theme} credits={credits} tier={tier} exp={exp} notesCount={publishedNotes.length} timetableKey={`${prefix}_timetable_${username}`} onNavigate={setActiveTab} />}
-          {activeTab === 'notes' && <NebulaDocs theme={theme} credits={credits} user={fullUser} onPublish={handlePublish} onUpdateCredits={(value, newExp = exp) => updateUserData(value, tier, newExp)} onEditorStateChange={setIsEditingDoc} />}
+          {activeTab === 'notes' && <NebulaDocs theme={theme} credits={credits} user={fullUser} onPublish={handlePublish} onUpdateCredits={(value, newExp = exp) => updateUserData(value, tier, newExp)} onEditorStateChange={setIsEditingDoc} christmasDoc={christmas.active.doc} christmasDocOwned={ownsChristmas(christmas, 'doc')} />}
           {activeTab === 'shared' && <SharedDashboard theme={theme} currentUser={username} user={fullUser} onPublishTransaction={chargePublishing} />}
           {activeTab === 'timetable' && <TimetableCalendar key={`${prefix}-${username}`} theme={theme} storageKey={`${prefix}_timetable_${username}`} />}
           {activeTab === 'game-room' && !isSchool && <GameRoomView user={{ ...user, tier, exp }} onGoToStore={() => setActiveTab('store')} />}
-          {activeTab === 'store' && <NebulaStore theme={theme} credits={credits} tier={tier} purchasedBgs={purchasedBgs} unlockedBorders={unlockedBorders} unlockedTemplates={unlockedTemplates} equippedBorder={equippedBorder} onPurchaseBackground={purchaseBackground} onPurchaseTier={purchaseTier} onPurchaseFrame={(frame, cost) => purchaseProfileItem('unlockedBorders', frame, cost)} onEquipFrame={equipFrame} onPurchaseTemplate={(template, cost) => purchaseProfileItem('unlockedTemplates', template, cost)} />}
-          {activeTab === 'settings' && <SettingsPage theme={theme} orgName={orgName} user={fullUser} activeBg={activeBg} purchasedBgs={purchasedBgs} initialSection={settingsSection} onSelectBackground={selectBackground} onEquipFrame={equipFrame} onNavigateToStore={() => setActiveTab('store')} onSignOut={onSignOut} />}
+          {activeTab === 'store' && <NebulaStore theme={theme} credits={credits} tier={tier} purchasedBgs={purchasedBgs} unlockedBorders={unlockedBorders} unlockedTemplates={unlockedTemplates} equippedBorder={equippedBorder} onPurchaseBackground={purchaseBackground} onPurchaseTier={purchaseTier} onPurchaseFrame={(frame, cost) => purchaseProfileItem('unlockedBorders', frame, cost)} onEquipFrame={equipFrame} onPurchaseTemplate={(template, cost) => purchaseProfileItem('unlockedTemplates', template, cost)} christmas={christmas} christmasPreview={christmasPreview} onBuyChristmas={buyChristmasItem} onToggleChristmas={toggleChristmas} />}
+          {activeTab === 'settings' && <SettingsPage theme={theme} orgName={orgName} user={fullUser} activeBg={activeBg} purchasedBgs={purchasedBgs} unlockedBorders={unlockedBorders} equippedBorder={equippedBorder} initialSection={settingsSection} onSelectBackground={selectBackground} onEquipFrame={equipFrame} onNavigateToStore={() => setActiveTab('store')} onSignOut={onSignOut} christmas={christmas} onToggleChristmas={toggleChristmas} />}
         </main>
       </div>
     </div>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Nebula Christmas site logo">
+  <defs>
+    <linearGradient id="nebulaGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="50%" stop-color="#d946ef"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <mask id="concept3Star" x="0" y="0" width="256" height="256" maskUnits="userSpaceOnUse" style="mask-type: alpha">
+      <image href="/christmas-site-star-mask.png" width="256" height="256"/>
+    </mask>
+  </defs>
+  <rect width="256" height="256" fill="url(#nebulaGradient)" mask="url(#concept3Star)"/>
+  <image href="/christmas-site-hat-art.png" width="256" height="256"/>
+</svg>

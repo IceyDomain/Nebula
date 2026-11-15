@@ -31,15 +31,21 @@ const OPTIONS = [
   },
 ];
 
-export default function SignInChoice({ onSelect = () => {}, onBack = () => {} }) {
+export default function SignInChoice({ onSelect = () => {}, onBack = () => {}, christmasPreview = false }) {
   return (
     <div className="sc">
       <style>{STYLES}</style>
 
       <header className="sc-header">
         <div className="sc-brand">
-          <img className="sc-star" src={STAR} alt="" />
-          <img className="sc-word" src={WORDMARK} alt="Nebula" />
+          {christmasPreview ? (
+            <img className="sc-christmas-word" src="/christmas-logo.png" alt="Nebula" />
+          ) : (
+            <>
+              <img className="sc-star" src={STAR} alt="" />
+              <img className="sc-word" src={WORDMARK} alt="Nebula" />
+            </>
+          )}
         </div>
         <button type="button" className="sc-back" onClick={onBack}>
           ← Back to home
@@ -141,6 +147,7 @@ const STYLES = `
 .sc-brand { display: flex; align-items: center; gap: 12px; }
 .sc-star { height: 30px; width: auto; }
 .sc-word { height: 18px; width: auto; }
+.sc-christmas-word { width: 104px; height: 82px; object-fit: contain; }
 .sc-back {
   background: none; border: 0; padding: 12px 0; cursor: pointer;
   color: var(--muted); font: inherit; font-size: 15px;

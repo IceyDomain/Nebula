@@ -8,6 +8,7 @@ import OwnerDashboard from './components/OwnerDashboard';
 import SignInChoice from './components/SignInChoice';
 import StandardDashboard from './components/StandardDashboard';
 import { SITE_PHASE } from './sitePhase';
+import { isEventActive } from './components/christmas';
 import { requestGoogleProfile } from './utils/googleAuth';
 import {
   applyDailyCreditsToStorage,
@@ -93,11 +94,36 @@ function addTestingSignupCredits(user) {
 }
 
 function App() {
+  const isChristmasPreview = new URLSearchParams(window.location.search).get('christmas-preview') === '1';
+  const isChristmasBrandingActive = isChristmasPreview || isEventActive();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSignUp, setIsSignUp] = useState(true);
   const [isSignInChoiceOpen, setIsSignInChoiceOpen] = useState(false);
   const [isOrganizationSignInOpen, setIsOrganizationSignInOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const iconLinks = [
+      ...document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]'),
+    ];
+    const originalAttributes = iconLinks.map((link) => ({
+      href: link.getAttribute('href'),
+      type: link.getAttribute('type'),
+    }));
+    iconLinks.forEach((link) => {
+      const isFavicon = link.rel === 'icon';
+      if (!isFavicon) return;
+      link.setAttribute('href', isChristmasBrandingActive ? '/christmas-site-logo.svg?v=4' : '/nebula-star.png');
+      link.setAttribute('type', isChristmasBrandingActive ? 'image/svg+xml' : 'image/png');
+    });
+
+    return () => iconLinks.forEach((link, index) => {
+      const original = originalAttributes[index];
+      if (original.href) link.setAttribute('href', original.href);
+      if (original.type) link.setAttribute('type', original.type);
+      else link.removeAttribute('type');
+    });
+  }, [isChristmasBrandingActive]);
 
   useEffect(() => {
     clearLegacySharedState();
@@ -242,21 +268,26 @@ function App() {
     setIsModalOpen(true);
   };
 
-  const handleOrganizationSignIn = ({ username, password }) => {
+  const handleOrganizationSignIn = ({ username, password, role }) => {
     const loginId = username.trim().toLowerCase();
     const foundUser = readUsers('organization').find((user) =>
-      (user.username === loginId || user.email === loginId) && user.password === password
+      (user.username === loginId || user.email === loginId)
+      && user.password === password
+      && (!role || user.role === role || (user.role === 'user' && role === 'student'))
     );
     if (!foundUser) throw new Error('Invalid credentials.');
 
-    const normalizedUser = normalizeUser(foundUser);
+    const normalizedUser = normalizeUser({
+      ...foundUser,
+      role: foundUser.role === 'user' && role === 'student' ? role : foundUser.role,
+    });
     localStorage.setItem(STORAGE_KEYS.activeUser, JSON.stringify(normalizedUser));
     localStorage.setItem(STORAGE_KEYS.activeOrganizationUser, JSON.stringify(normalizedUser));
     setCurrentUser(normalizedUser);
     setIsOrganizationSignInOpen(false);
   };
 
-  const handleOrganizationSignUp = ({ username, email, password, org }) => {
+  const handleOrganizationSignUp = ({ username, email, password, org, role, grade, form }) => {
     const users = readUsers('organization');
     const normalizedUsername = username.trim().toLowerCase();
     const normalizedEmail = email.trim().toLowerCase();
@@ -269,7 +300,9 @@ function App() {
       email: normalizedEmail,
       password,
       organization: org,
-      role: 'user',
+      role: role || 'student',
+      grade,
+      form,
       credits: 1000,
     }));
     const nextUsers = [...users, newUser];
@@ -339,9 +372,14 @@ function App() {
   }
 
   return (
-    <div className="app-root">
+    <div className="app-root" data-event={isChristmasBrandingActive ? 'christmas' : undefined}>
+      {isChristmasPreview && <div className="christmas-preview-badge" role="status">Christmas preview</div>}
       {isSignInChoiceOpen ? (
-        <SignInChoice onSelect={handleSelectSignInType} onBack={() => setIsSignInChoiceOpen(false)} />
+        <SignInChoice
+          onSelect={handleSelectSignInType}
+          onBack={() => setIsSignInChoiceOpen(false)}
+          christmasPreview={isChristmasBrandingActive}
+        />
       ) : isOrganizationSignInOpen ? (
         <FindOrganization
           onBack={() => {
@@ -351,9 +389,10 @@ function App() {
           onSignIn={handleOrganizationSignIn}
           onSignUp={handleOrganizationSignUp}
           onGoogleSignIn={handleOrganizationGoogleSignIn}
+          christmasPreview={isChristmasBrandingActive}
         />
       ) : (
-        <LandingPage onOpenModal={handleOpenSignInChoice} />
+        <LandingPage onOpenModal={handleOpenSignInChoice} christmasPreview={isChristmasBrandingActive} />
       )}
       <AuthModal
         isOpen={isModalOpen}

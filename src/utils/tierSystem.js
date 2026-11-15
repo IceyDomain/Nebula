@@ -62,12 +62,13 @@ export function getDiscountedStorePrice(itemPrice, activeTier = 'Basic') {
   return Math.floor(itemPrice * (1 - perks.discount));
 }
 
-export function handleStorePurchase({ user, itemPrice, activeTier = user.tier || 'Basic' }) {
+export function handleStorePurchase({ user, itemPrice, activeTier = user.tier || 'Basic', onNotify }) {
   const perks = TIER_PERKS[activeTier] || TIER_PERKS.Basic;
   const finalPrice = getDiscountedStorePrice(itemPrice, activeTier);
+  const notify = onNotify || ((message) => alert(message));
 
   if (user.credits < finalPrice) {
-    alert(`Not enough credits. You need ${finalPrice} credits.`);
+    notify(`Not enough credits. You need ${finalPrice} credits.`, 'error');
     return null;
   }
 
@@ -84,16 +85,16 @@ export function handleStorePurchase({ user, itemPrice, activeTier = user.tier ||
     if (newTier !== 'Nebula' && calculatedTierLevel > currentTierLevel) {
       newTier = calculatedTier;
       newCredits += TIER_PERKS[calculatedTier].milestoneReward;
-      alert(`Level up! You reached Level ${newProgress.level} and unlocked ${newTier} Tier (+${TIER_PERKS[calculatedTier].milestoneReward} bonus credits).`);
+      notify(`Level up! You reached Level ${newProgress.level} and unlocked ${newTier} Tier (+${TIER_PERKS[calculatedTier].milestoneReward} bonus credits).`, 'success');
     } else {
-      alert(`Level up! You reached Level ${newProgress.level}.`);
+      notify(`Level up! You reached Level ${newProgress.level}.`, 'success');
     }
   }
 
   return { ...user, credits: newCredits, exp: newTotalExp, tier: newTier };
 }
 
-export function handleTierPurchase({ user, nextTier }) {
+export function handleTierPurchase({ user, nextTier, onNotify }) {
   const perks = TIER_PERKS[nextTier];
   const currentTierLevel = TIER_PERKS[user.tier || 'Basic']?.level || 0;
   if (!perks?.buyable || perks.price <= 0 || perks.level <= currentTierLevel) return null;
@@ -102,6 +103,7 @@ export function handleTierPurchase({ user, nextTier }) {
     user,
     itemPrice: perks.price,
     activeTier: user.tier || 'Basic',
+    onNotify,
   });
   if (!purchasedUser) return null;
 
