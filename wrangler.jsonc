@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "frozen-nebula",
   "main": "src/worker.js",
+  "account_id": "582ad0c00a3a77c376cda61a74aadd1c",
   "compatibility_date": "2026-10-19",
   "observability": {
     "enabled": true

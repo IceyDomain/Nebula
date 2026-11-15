@@ -83,7 +83,7 @@ The community API is served by the Cloudflare Worker configured in `wrangler.jso
 npx wrangler d1 create nebula-community
 ```
 
-Run `npm run dev:cloudflare` to build the site and start the Worker with a local D1 database. Local migrations are in `migrations/`. For a one-time automatic deployment setup, add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository Actions secrets. The token must be allowed to deploy Workers and manage D1 migrations for this account. After that, pushes to `main` run tests and deploy the Worker and assets automatically; the workflow can also be started manually from the Actions tab.
+Run `npm run dev:cloudflare` to build the site and start the Worker with a local D1 database. Local migrations are in `migrations/`. For a one-time automatic deployment setup, add `CLOUDFLARE_API_TOKEN` as a repository Actions secret. The account ID is configured in `wrangler.jsonc`; it is not a secret. The token must be allowed to deploy Workers and manage D1 migrations for this account. After that, pushes to `main` run tests and deploy the Worker and assets automatically; the workflow can also be started manually from the Actions tab.
 
 To deploy manually, authenticate Wrangler with the Cloudflare account that owns the site and run:
 
